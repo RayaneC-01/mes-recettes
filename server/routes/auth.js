@@ -21,7 +21,7 @@ router.post('/register', async (req, res) => {
     // 2. Vérification de l'email unique
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
-      return res.status(400).json({ message: "Cet email est déjà utilisé" }); 
+      return res.status(400).json({ message: "Cet email est déjà utilisé" });
     }
 
     // 3. Vérification de l'username unique
@@ -66,15 +66,15 @@ router.post('/login', async (req, res) => {
 
     // 3. Si l'utilisateur n'existe pas -> Message générique sécurisé 
     if (!user) {
-      return res.status(401).json({ message: "Email ou mot de passe incorrect" }); 
+      return res.status(401).json({ message: "Email ou mot de passe incorrect" });
     }
 
     // 4. Comparaison du mot de passe
     const isPasswordValid = await user.comparePassword(password);
-    
+
     // 5. Si le mot de passe est faux -> Même message générique sécurisé 
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Email ou mot de passe incorrect" }); 
+      return res.status(401).json({ message: "Email ou mot de passe incorrect" });
     }
 
     // 6. Connexion réussie : retour des infos sans le mot de passe 
