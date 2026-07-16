@@ -2,7 +2,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config(); // Permet de lire le fichier .env
+require('dotenv').config();
+const authRoutes = require('./routes/auth');
 
 // 2. Initialisation de l'application Express
 const app = express();
@@ -12,6 +13,10 @@ const app = express();
 app.use(cors());
 // Permet à Express de lire le format JSON dans les requêtes
 app.use(express.json());
+
+// 4. Définition des routes
+app.use('/api/auth', authRoutes);
+
 
 // 4. Connexion à MongoDB via Mongoose
 mongoose.connect(process.env.MONGO_URI)
