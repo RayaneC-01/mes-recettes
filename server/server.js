@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 const authRoutes = require('./routes/auth');
-
+const recipeRoutes = require('./routes/recipes');
 // 2. Initialisation de l'application Express
 const app = express();
 
@@ -16,6 +16,7 @@ app.use(express.json());
 
 // 4. Définition des routes
 app.use('/api/auth', authRoutes);
+app.use('/api/recipes', recipeRoutes);
 
 
 // 4. Connexion à MongoDB via Mongoose
