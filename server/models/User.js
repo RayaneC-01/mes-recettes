@@ -13,12 +13,17 @@ const userSchema = new mongoose.Schema({
 });
 
 // 2. Hachage automatique du mot de passe avant la sauvegarde en BDD
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
+userSchema.pre('save', async function () {
+    // Si le mot de passe n'a pas été modifié, on ne fait rien
+    if (!this.isModified('password')) return;
 
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
+    try {
+        // Hachage du mot de passe (exemple avec bcrypt)
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+    } catch (error) {
+        throw error; // Intercepte l'erreur pour la gestion des erreurs dans le routeur
+    }
 });
 
 // 3. Export du modèle pour l'utiliser dans le reste du projet
