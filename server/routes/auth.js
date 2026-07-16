@@ -8,7 +8,7 @@ const User = require('../models/User');
 // ==========================================
 // 2. ROUTE D'INSCRIPTION : POST /register
 // ==========================================
-// Cette route est appelée sur http://localhost:5000/api/auth/register [cite: 151]
+// Cette route est appelée sur http://localhost:5000/api/auth/register 
 router.post('/register', async (req, res) => {
   try {
     const { firstName, lastName, username, email, password, phone } = req.body;
@@ -87,6 +87,19 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// ==========================================
+// BONUS : OBTENIR TOUS LES UTILISATEURS (GET /)
+// ==========================================
+router.get('/users', async (req, res) => {
+  try {
+    // Récupérer tous les utilisateurs mais SANS leur mot de passe pour la sécurité
+    const users = await User.find().select('-password');
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Une erreur est survenue lors de la récupération des utilisateurs" });
+  }
+});
 // ==========================================
 // 4. EXPORT DU ROUTER
 // ==========================================
