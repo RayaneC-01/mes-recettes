@@ -51,7 +51,7 @@ router.post('/register', async (req, res) => {
 // ==========================================
 // 3. ROUTE DE CONNEXION : POST /login
 // ==========================================
-// Cette route est appelée sur http://localhost:5000/api/auth/login [cite: 151]
+// Cette route est appelée sur http://localhost:5000/api/auth/login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -90,6 +90,7 @@ router.post('/login', async (req, res) => {
 // ==========================================
 // BONUS : OBTENIR TOUS LES UTILISATEURS (GET /)
 // ==========================================
+// Cette route est appelée sur http://localhost:5000/api/auth/users
 router.get('/users', async (req, res) => {
   try {
     // Récupérer tous les utilisateurs mais SANS leur mot de passe pour la sécurité
@@ -100,6 +101,8 @@ router.get('/users', async (req, res) => {
     return res.status(500).json({ message: "Une erreur est survenue lors de la récupération des utilisateurs" });
   }
 });
+
+
 // ==========================================
 // 4. EXPORT DU ROUTER
 // ==========================================
