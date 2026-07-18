@@ -1,1 +1,1 @@
-New-Item "src/components/Navbar.jsx", "src/components/RecipeCard.jsx", "src/components/RecipeForm.jsx", "src/components/CategoryFilter.jsx", "src/components/SearchBar.jsx"
+// Formulaire d'ajout (connecté uniquement)
