@@ -1,0 +1,1 @@
+//Stocke l'utilisateur connecté, fournit les fonctions login et logout à toute l'application via useContext
