@@ -1,0 +1,1 @@
+// Detail complet d'une recette (accessible à tous)
