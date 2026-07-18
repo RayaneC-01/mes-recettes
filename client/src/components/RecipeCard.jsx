@@ -1,0 +1,1 @@
+//Carte d'aperçu : image, titre, catégorie,temps Props: recipe 
