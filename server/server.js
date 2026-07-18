@@ -24,7 +24,7 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Connexion à MongoDB réussie !'))
   .catch((err) => console.error('❌ Erreur de connexion à MongoDB :', err));
 
-// 5. Une petite route de test pour vérifier que tout fonctionne
+// 5. Route de test pour vérifier que le serveur fonctionne
 app.get('/', (req, res) => {
   res.send('Le serveur de MesRecettes tourne nickel !');
 });
