@@ -42,7 +42,7 @@ export const getRecipeById = async (id) => {
 };
 
 // Ajouter une nouvelle recette
-export const crerateRecipe = async (recipeData) => {
+export const createRecipe = async (recipeData) => {
     const response = await fetch(`${BASE_URL}/recipes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

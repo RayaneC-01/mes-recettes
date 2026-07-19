@@ -5,38 +5,23 @@ import { AuthContext } from '../context/AuthContext';
 
 function Login() {
   // 2. CORPS DU COMPOSANT
-  const { login } = useContext(AuthContext);
+  
+  // On récupère la fonction login, mais AUSSI les états error et loading du Contexte
+  const { login, error: contextError, loading } = useContext(AuthContext);
   const navigate = useNavigate();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
-    try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    // On envoie les identifiants (credentials) attendus par ton AuthContext
+    const success = await login({ email, password });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        login(data.user); 
-        navigate('/');
-      } else {
-        setError(data.message || 'Identifiants incorrects.');
-      }
-
-    // eslint-disable-next-line no-unused-vars
-    } catch (err) {
-      setError('Impossible de se connecter au serveur backend.');
+    // Si la fonction login de ton contexte renvoie true (connexion réussie)
+    if (success) {
+      navigate('/');
     }
   };
 
@@ -46,9 +31,10 @@ function Login() {
       <div style={styles.card}>
         <h2 style={styles.title}>Connexion à votre espace</h2>
 
-        {error && (
+        {/* On utilise ici "contextError" qui vient directement de ton AuthContext */}
+        {contextError && (
           <div style={styles.errorBanner}>
-            {error}
+            {contextError}
           </div>
         )}
 
@@ -61,6 +47,7 @@ function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               style={styles.input}
+              disabled={loading} // Désactive le champ pendant le chargement
               required
             />
           </div>
@@ -73,12 +60,14 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={styles.input}
+              disabled={loading} // Désactive le champ pendant le chargement
               required
             />
           </div>
 
-          <button type="submit" style={styles.button}>
-            Se connecter
+          {/* Le bouton change de texte et se désactive si la requête est en cours */}
+          <button type="submit" style={styles.button} disabled={loading}>
+            {loading ? 'Connexion en cours...' : 'Se connecter'}
           </button>
         </form>
       </div>
