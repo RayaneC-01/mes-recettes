@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 function Register() {
   const navigate = useNavigate();
 
-  // 1. Un seul état pour regrouper tous nos champs de formulaire
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -12,14 +11,14 @@ function Register() {
     email: "",
     phone: "",
     password: "",
-    confirmPassword: "", // Champ bonus essentiel côté client !
+    confirmPassword: "",
   });
 
-  // États pour la gestion des erreurs et du chargement
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Gestion dynamique des changements dans les inputs
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -27,12 +26,10 @@ function Register() {
     });
   };
 
-  // 2. Fonction de soumission avec restrictions strictes
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // Restriction A : Vérifier que tous les champs requis sont remplis
     if (
       !formData.firstName ||
       !formData.lastName ||
@@ -45,13 +42,11 @@ function Register() {
       return;
     }
 
-    // Restriction B : Vérifier la longueur du mot de passe avant d'appeler le serveur
     if (formData.password.length < 6 || formData.password.length > 20) {
       setError("Le mot de passe doit contenir entre 6 et 20 caractères.");
       return;
     }
 
-    // Restriction C : Validation de la confirmation du mot de passe
     if (formData.password !== formData.confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
       return;
@@ -60,7 +55,6 @@ function Register() {
     try {
       setLoading(true);
 
-      // Appel de ton API Backend
       const response = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: {
@@ -79,13 +73,9 @@ function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        // Récupère l'erreur exacte envoyée par ton backend (ex: "Cet email est déjà utilisé")
-        throw new Error(
-          data.message || "Une erreur est survenue lors de l'inscription.",
-        );
+        throw new Error(data.message || "Une erreur est survenue lors de l'inscription.");
       }
 
-      // Si l'inscription réussit, on redirige vers la page de connexion
       navigate("/login");
     } catch (err) {
       setError(err.message);
@@ -99,7 +89,6 @@ function Register() {
       <form onSubmit={handleSubmit} style={formStyle}>
         <h2 style={titleStyle}>Créer un compte 🍳</h2>
 
-        {/* Affichage de l'erreur si elle existe */}
         {error && <div style={errorAlertStyle}>{error}</div>}
 
         <div style={rowStyle}>
@@ -163,28 +152,48 @@ function Register() {
           />
         </div>
 
+        {/* Mot de passe principal */}
         <div style={inputGroupStyle}>
           <label style={labelStyle}>Mot de passe (6-20 caractères)</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            style={inputStyle}
-            placeholder="••••••••"
-          />
+          <div style={inputContainerStyle}>
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              style={inputWithBtnStyle}
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={eyeButtonStyle}
+            >
+              {showPassword ? "Masquer" : "Afficher"}
+            </button>
+          </div>
         </div>
 
+        {/* Confirmation */}
         <div style={inputGroupStyle}>
           <label style={labelStyle}>Confirmer le mot de passe</label>
-          <input
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            style={inputStyle}
-            placeholder="••••••••"
-          />
+          <div style={inputContainerStyle}>
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              style={inputWithBtnStyle}
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={eyeButtonStyle}
+            >
+              {showConfirmPassword ? "Masquer" : "Afficher"}
+            </button>
+          </div>
         </div>
 
         <button type="submit" disabled={loading} style={btnPrimaryStyle}>
@@ -196,7 +205,7 @@ function Register() {
 }
 
 // ==========================================
-// STYLES CLASSIQUES & PROPRES (STYLE BOOTSTRAP)
+// STYLES CSS AJUSTÉS
 // ==========================================
 const containerStyle = {
   display: "flex",
@@ -223,7 +232,9 @@ const titleStyle = {
   marginBottom: "25px",
   fontWeight: "700",
 };
+
 const rowStyle = { display: "flex", gap: "15px", marginBottom: "15px" };
+
 const inputGroupStyle = {
   display: "flex",
   flexDirection: "column",
@@ -231,7 +242,9 @@ const inputGroupStyle = {
   marginBottom: "15px",
   width: "100%",
 };
+
 const labelStyle = { fontSize: "0.9rem", fontWeight: "600", color: "#495057" };
+
 const inputStyle = {
   padding: "10px 14px",
   border: "1px solid #ced4da",
@@ -239,6 +252,26 @@ const inputStyle = {
   fontSize: "1rem",
   color: "#212529",
 };
+
+// Conteneur parent relatif indispensable pour positionner le bouton à l'intérieur
+const inputContainerStyle = {
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  width: "100%",
+};
+
+// Input spécifique avec de l'espace à droite pour ne pas écrire sous le bouton
+const inputWithBtnStyle = {
+  padding: "10px 85px 10px 14px",
+  border: "1px solid #ced4da",
+  borderRadius: "6px",
+  fontSize: "1rem",
+  color: "#212529",
+  width: "100%",
+  boxSizing: "border-box", 
+};
+
 const errorAlertStyle = {
   padding: "12px",
   backgroundColor: "#f8d7da",
@@ -249,6 +282,7 @@ const errorAlertStyle = {
   fontSize: "0.95rem",
   fontWeight: "500",
 };
+
 const btnPrimaryStyle = {
   width: "100%",
   padding: "12px",
@@ -260,6 +294,23 @@ const btnPrimaryStyle = {
   fontWeight: "600",
   cursor: "pointer",
   marginTop: "10px",
+};
+
+const eyeButtonStyle = {
+  position: "absolute",
+  right: "12px",
+  top: "50%",
+  transform: "translateY(-50%)", 
+  background: "none",
+  border: "none",
+  color: "#0d6efd",
+  cursor: "pointer",
+  fontSize: "0.85rem",
+  fontWeight: "600",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  padding: "4px 8px",
+  borderRadius: "4px",
 };
 
 export default Register;

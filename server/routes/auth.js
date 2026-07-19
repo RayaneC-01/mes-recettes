@@ -29,7 +29,7 @@ router.post('/register', async (req, res) => {
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: "L'email n'est pas valide" });
     }
-    
+
     // 3. Vérification de l'username unique
     const existingUsername = await User.findOne({ username });
     if (existingUsername) {
@@ -51,12 +51,12 @@ router.post('/register', async (req, res) => {
       lastName,
       username,
       email,
-      password: hashedPassword, // On enregistre la version sécurisée !
+      password: hashedPassword,
       phone
     });
-    // 6. Réponse propre sans le mot de passe
+
+    // 6. Réponse propre sans le mot de passe (On supprime setSuccessMessage d'ici !)
     const { _id, createdAt } = newUser;
-    setSuccessMessage("Inscription réussie !");
     return res.status(201).json({ _id, firstName, lastName, username, email, phone, createdAt });
 
   } catch (error) {
