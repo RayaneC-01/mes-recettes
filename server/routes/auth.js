@@ -71,17 +71,17 @@ router.post('/register', async (req, res) => {
 // Cette route est appelée sur http://localhost:5000/api/auth/login
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body; // On revient à "email"
 
     // 1. Vérification de la présence des identifiants
     if (!email || !password) {
       return res.status(400).json({ message: "L'email et le mot de passe sont obligatoires" });
     }
 
-    // 2. Recherche de l'utilisateur et récupération du mot de passe masqué (select: '+password')
+    // 2. Recherche de l'utilisateur uniquement par son Email
     const user = await User.findOne({ email }).select('+password');
 
-    // 3. Si l'utilisateur n'existe pas -> Message générique sécurisé 
+    // 3. Si l'utilisateur n'existe pas -> Message sécurisé 
     if (!user) {
       return res.status(401).json({ message: "Email ou mot de passe incorrect" });
     }
@@ -89,7 +89,7 @@ router.post('/login', async (req, res) => {
     // 4. Comparaison du mot de passe
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    // 5. Si le mot de passe est faux -> Même message générique sécurisé 
+    // 5. Si le mot de passe est faux -> Message sécurisé 
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Email ou mot de passe incorrect" });
     }
@@ -118,8 +118,27 @@ router.get('/users', async (req, res) => {
     return res.status(500).json({ message: "Une erreur est survenue lors de la récupération des utilisateurs" });
   }
 });
-
-
+// ==========================================
+// BONUS : SUPPRIMER UN UTILISATEUR (DELETE /:id)
+// ==========================================
+// Cette route est appelée sur http://localhost:5000/api/auth/user/:id
+router.delete('/user/:id', async (req, res) => {
+  try {
+    // Récupérer l'ID de l'utilisateur à supprimer depuis les paramètres de la requête  
+    const userId = req.params.id;
+    // Supprimer l'utilisateur de la base de données
+    const deletedUser = await User.findByIdAndDelete(userId);
+    // Si aucun utilisateur n'a été trouvé avec cet ID, renvoyer une erreur 404
+    if (!deletedUser) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+    // Si l'utilisateur a été supprimé avec succès, renvoyer un message de confirmation
+    return res.status(200).json({ message: "Utilisateur supprimé avec succès" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Une erreur est survenue lors de la suppression de l'utilisateur" });
+  }
+});
 // ==========================================
 // 4. EXPORT DU ROUTER
 // ==========================================
