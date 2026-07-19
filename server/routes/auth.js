@@ -4,7 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-
+const bcrypt = require('bcryptjs');
 // ==========================================
 // 2. ROUTE D'INSCRIPTION : POST /register
 // ==========================================
@@ -24,6 +24,12 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: "Cet email est déjà utilisé" });
     }
 
+    //2.5 Verification de la validité de l'email 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "L'email n'est pas valide" });
+    }
+    
     // 3. Vérification de l'username unique
     const existingUsername = await User.findOne({ username });
     if (existingUsername) {
@@ -35,11 +41,22 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: "Le mot de passe doit contenir entre 6 et 20 caractères" });
     }
 
-    // 5. Création de l'utilisateur [cite: 232]
-    const newUser = await User.create({ firstName, lastName, username, email, password, phone });
+    // 4.5 HACHAGE DU MOT DE PASSE 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 6. Réponse propre sans le mot de passe (statut 201) [cite: 155, 165]
+    // 5. Création de l'utilisateur avec le mot de passe haché
+    const newUser = await User.create({
+      firstName,
+      lastName,
+      username,
+      email,
+      password: hashedPassword, // On enregistre la version sécurisée !
+      phone
+    });
+    // 6. Réponse propre sans le mot de passe
     const { _id, createdAt } = newUser;
+    setSuccessMessage("Inscription réussie !");
     return res.status(201).json({ _id, firstName, lastName, username, email, phone, createdAt });
 
   } catch (error) {
@@ -70,7 +87,7 @@ router.post('/login', async (req, res) => {
     }
 
     // 4. Comparaison du mot de passe
-    const isPasswordValid = await user.comparePassword(password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     // 5. Si le mot de passe est faux -> Même message générique sécurisé 
     if (!isPasswordValid) {
