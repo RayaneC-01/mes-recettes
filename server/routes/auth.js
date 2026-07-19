@@ -41,17 +41,13 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: "Le mot de passe doit contenir entre 6 et 20 caractères" });
     }
 
-    // 4.5 HACHAGE DU MOT DE PASSE 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     // 5. Création de l'utilisateur avec le mot de passe haché
     const newUser = await User.create({
       firstName,
       lastName,
       username,
       email,
-      password: hashedPassword,
+      password: password, // Le mot de passe sera haché automatiquement grâce au middleware dans le modèle User
       phone
     });
 
