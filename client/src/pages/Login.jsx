@@ -1,144 +1,202 @@
-// 1. ZONE DES IMPORTS
-import { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+// Importation du contexte pour gérer l'authentification
+import { AuthContext } from "../context/AuthContext"; 
 
 function Login() {
-  // 2. CORPS DU COMPOSANT
-  
-  // On récupère la fonction login, mais AUSSI les états error et loading du Contexte
-  const { login, error: contextError, loading } = useContext(AuthContext);
+  // Utilisation de useNavigate pour rediriger après la connexion
   const navigate = useNavigate();
+  // Récupération de la fonction login depuis le contexte AuthContext
+  const { login } = useContext(AuthContext); 
+
+  // États pour les champs, les erreurs et le chargement
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  // État pour afficher/masquer le mot de passe
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // On envoie les identifiants (credentials) attendus par ton AuthContext
-    const success = await login({ email, password });
+    if (!email || !password) {
+      setError("L'email et le mot de passe sont obligatoires.");
+      return;
+    }
 
-    // Si la fonction login de ton contexte renvoie true (connexion réussie)
-    if (success) {
-      navigate('/');
+    try {
+      setLoading(true);
+
+      // On utilise la fonction login du contexte
+      // Elle se charge de faire le fetch, de stocker les données et de mettre à jour l'état global
+      const success = await login({ email, password });
+
+      if (!success) {
+        throw new Error("Email ou mot de passe incorrect.");
+      }
+
+      // Connexion réussie ! Redirection vers l'accueil
+      navigate("/");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 3. AFFICHAGE DU FORMULAIRE
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Connexion à votre espace</h2>
+    <div style={containerStyle}>
+      <form onSubmit={handleSubmit} style={formStyle}>
+        <h2 style={titleStyle}>Connexion 🍳</h2>
 
-        {/* On utilise ici "contextError" qui vient directement de ton AuthContext */}
-        {contextError && (
-          <div style={styles.errorBanner}>
-            {contextError}
-          </div>
-        )}
+        {error && <div style={errorAlertStyle}>{error}</div>}
 
-        <form onSubmit={handleSubmit}>
-          <div style={styles.formGroup}>
-            <label htmlFor="email" style={styles.label}>Adresse Email :</label>
+        <div style={inputGroupStyle}>
+          <label style={labelStyle}>Adresse Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={inputStyle}
+            placeholder="chef@example.com"
+          />
+        </div>
+
+        {/* Bloc Mot de passe sécurisé avec bouton intégré */}
+        <div style={inputGroupStyle}>
+          <label style={labelStyle}>Mot de passe</label>
+          <div style={inputContainerStyle}>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
-              disabled={loading} // Désactive le champ pendant le chargement
-              required
-            />
-          </div>
-
-          <div style={styles.formGroup}>
-            <label htmlFor="password" style={styles.label}>Mot de passe :</label>
-            <input
-              type="password"
-              id="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={styles.input}
-              disabled={loading} // Désactive le champ pendant le chargement
-              required
+              style={inputWithBtnStyle}
+              placeholder="••••••••"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={eyeButtonStyle}
+            >
+              {showPassword ? "Masquer" : "Afficher"}
+            </button>
           </div>
+        </div>
 
-          {/* Le bouton change de texte et se désactive si la requête est en cours */}
-          <button type="submit" style={styles.button} disabled={loading}>
-            {loading ? 'Connexion en cours...' : 'Se connecter'}
-          </button>
-        </form>
-      </div>
+        <button type="submit" disabled={loading} style={btnPrimaryStyle}>
+          {loading ? "Connexion en cours..." : "Se connecter"}
+        </button>
+      </form>
     </div>
   );
 }
 
-// 4. LES STYLES CSS (Objets JavaScript pour le style React)
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '80vh',
-    fontFamily: 'Arial, sans-serif',
-    backgroundColor: '#f9f9f9',
-  },
-  card: {
-    width: '100%',
-    maxWidth: '400px',
-    padding: '30px',
-    borderRadius: '10px',
-    backgroundColor: '#ffffff',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-  },
-  title: {
-    textAlign: 'center',
-    marginBottom: '20px',
-    color: '#333333',
-  },
-  errorBanner: {
-    color: '#721c24',
-    backgroundColor: '#f8d7da',
-    border: '1px solid #f5c6cb',
-    padding: '10px',
-    borderRadius: '5px',
-    marginBottom: '20px',
-    fontSize: '14px',
-    textAlign: 'center',
-  },
-  formGroup: {
-    marginBottom: '15px',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  label: {
-    marginBottom: '5px',
-    fontSize: '14px',
-    color: '#555555',
-    fontWeight: 'bold',
-  },
-  input: {
-    padding: '10px',
-    fontSize: '16px',
-    borderRadius: '5px',
-    border: '1px solid #cccccc',
-    outline: 'none',
-  },
-  button: {
-    width: '100%',
-    padding: '12px',
-    fontSize: '16px',
-    color: '#ffffff',
-    backgroundColor: '#4CAF50',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    marginTop: '10px',
-  },
+// ==========================================
+// STYLES CSS (Identiques à Register)
+// ==========================================
+const containerStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  minHeight: "calc(100vh - 70px)",
+  padding: "40px 20px",
+  fontFamily: "system-ui, -apple-system, sans-serif",
 };
 
-// 5. EXPORTATION
+const formStyle = {
+  backgroundColor: "#ffffff",
+  padding: "30px",
+  borderRadius: "12px",
+  boxShadow: "0 4px 24px rgba(0, 0, 0, 0.05)",
+  border: "1px solid #dee2e6",
+  width: "100%",
+  maxWidth: "450px",
+};
+
+const titleStyle = {
+  textAlign: "center",
+  color: "#212529",
+  marginBottom: "25px",
+  fontWeight: "700",
+};
+
+const inputGroupStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "6px",
+  marginBottom: "15px",
+  width: "100%",
+};
+
+const labelStyle = { fontSize: "0.9rem", fontWeight: "600", color: "#495057" };
+
+const inputStyle = {
+  padding: "10px 14px",
+  border: "1px solid #ced4da",
+  borderRadius: "6px",
+  fontSize: "1rem",
+  color: "#212529",
+};
+
+const inputContainerStyle = {
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  width: "100%",
+};
+
+const inputWithBtnStyle = {
+  padding: "10px 85px 10px 14px",
+  border: "1px solid #ced4da",
+  borderRadius: "6px",
+  fontSize: "1rem",
+  color: "#212529",
+  width: "100%",
+  boxSizing: "border-box",
+};
+
+const errorAlertStyle = {
+  padding: "12px",
+  backgroundColor: "#f8d7da",
+  color: "#842029",
+  border: "1px solid #f5c2c7",
+  borderRadius: "6px",
+  marginBottom: "20px",
+  fontSize: "0.95rem",
+  fontWeight: "500",
+};
+
+const btnPrimaryStyle = {
+  width: "100%",
+  padding: "12px",
+  backgroundColor: "#0d6efd",
+  color: "#ffffff",
+  border: "none",
+  borderRadius: "6px",
+  fontSize: "1rem",
+  fontWeight: "600",
+  cursor: "pointer",
+  marginTop: "10px",
+};
+
+const eyeButtonStyle = {
+  position: "absolute",
+  right: "12px",
+  top: "50%",
+  transform: "translateY(-50%)",
+  background: "none",
+  border: "none",
+  color: "#0d6efd",
+  cursor: "pointer",
+  fontSize: "0.85rem",
+  fontWeight: "600",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  padding: "4px 8px",
+  borderRadius: "4px",
+};
+
 export default Login;
