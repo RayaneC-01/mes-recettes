@@ -1,4 +1,3 @@
-//Modele de recette
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
@@ -34,5 +33,4 @@ const recipeSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Export du modèle pour l'utiliser dans le reste du projet
 module.exports = mongoose.model("Recipe", recipeSchema);
