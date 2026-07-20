@@ -41,7 +41,7 @@ export default function RecipeForm({ initialData, onSubmit }) {
     e.preventDefault();
     onSubmit({
       ...formData,
-      prepTime: Number(formData.prepTime), // On s'assure que c't un nombre
+      prepTime: Number(formData.prepTime),
     });
   };
 
@@ -143,7 +143,7 @@ export default function RecipeForm({ initialData, onSubmit }) {
   );
 }
 
-// Styles simples
+// Styles
 const formStyle = {
   display: "flex",
   flexDirection: "column",
