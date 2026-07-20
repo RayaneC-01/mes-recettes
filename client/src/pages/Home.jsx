@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Animation from "../Animation";
 import SearchBar from "../components/SearchBar";
 import CategoryFilter from "../components/CategoryFilter";
+import RecipeCard from "../components/RecipeCard";
+
 
 export default function Home() {
   const [recipes, setRecipes] = useState([]);
@@ -75,12 +77,9 @@ export default function Home() {
                 Aucune recette ne correspond à votre recherche.
               </p>
             ) : (
+                // Affichage des recettes filtrées ou Toutes les recettes si aucun filtre n'est appliqué
               filteredRecipes.map((recipe) => (
-                <div key={recipe._id} style={cardStyle}>
-                  <h3>{recipe.title}</h3>
-                  <p>{recipe.description || "Aucune description"}</p>
-                  <span style={badgeStyle}>{recipe.category}</span>
-                </div>
+                <RecipeCard key={recipe._id} recipe={recipe} />
               ))
             )}
           </div>
@@ -133,21 +132,3 @@ const gridStyle = {
   marginTop: "10px",
 };
 
-const cardStyle = {
-  backgroundColor: "#ffffff",
-  padding: "20px",
-  borderRadius: "8px",
-  border: "1px solid #dee2e6",
-  textAlign: "left",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-between",
-};
-
-const badgeStyle = {
-  marginTop: "10px",
-  alignSelf: "flex-start",
-  fontSize: "0.8rem",
-  fontWeight: "bold",
-  color: "#0d6efd",
-};
