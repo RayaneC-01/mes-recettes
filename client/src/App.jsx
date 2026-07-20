@@ -7,7 +7,7 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 //barre de recherche + filtres
 import SearchBar from "./components/SearchBar";
-// import AddRecipe from './pages/AddRecipe';
+import AddRecipe from './pages/AddRecipe';
 // import RecipeDetail from './pages/RecipeDetail';
 // import EditRecipe from './pages/EditRecipe';
 
@@ -22,7 +22,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/search" element={<SearchBar />} />
-          {/* <Route path="/ajouter" element={<AddRecipe />} /> */}
+          <Route path="/ajouter" element={<AddRecipe />} />
           {/* <Route path="/recette/:id" element={<RecipeDetail />} /> */}
           {/* <Route path="/modifier/:id" element={<EditRecipe />} /> */}
         </Routes>

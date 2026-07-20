@@ -25,7 +25,8 @@ function Navbar() {
         {/* CONDITION "IF" : Connecté */}
         {user ? (
           <>
-            <Link to="/add-recipe" style={navbarLinkStyle}>
+            {/* Remplacer /add-recipe par /ajouter */}
+            <Link to="/ajouter" style={navbarLinkStyle}>
               Ajouter une recette
             </Link>
 
