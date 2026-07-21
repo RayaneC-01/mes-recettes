@@ -1,26 +1,32 @@
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function RecipeCard({ recipe }) {
   const navigate = useNavigate();
 
   return (
-    <div 
-      style={cardStyle} 
-      onClick={() => navigate(`/recette/${recipe._id}`)}
-    >
-      {/* Image (si présente) */}
-      {recipe.imageUrl && (
-        <img src={recipe.imageUrl} alt={recipe.title} style={imageStyle} />
+    <div style={cardStyle} onClick={() => navigate(`/recette/${recipe._id}`)}>
+        {/* Image de chaque recette */}
+      {recipe.image ? (
+        <img src={recipe.image} alt={recipe.title} style={imageStyle} />
+        ) : (
+        <div style={{ ...imageStyle, backgroundColor: "#f8f9fa", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ color: "#6c757d" }}>Aucune image disponible</span>
+        </div>
       )}
-
       <div style={{ padding: "15px" }}>
-        <span style={badgeStyle}>{recipe.category}</span>
         <h3 style={titleStyle}>{recipe.title}</h3>
-        
+        <span style={badgeStyle}>{recipe.category}</span>
+
         {/* Temps de préparation (si présent) */}
-        {recipe.prepTime && (
-          <p style={timeStyle}>⏱️ {recipe.prepTime} mins</p>
-        )}
+        {recipe.prepTime && <p style={timeStyle}>⏱️ {recipe.prepTime} mins</p>}
+        {/*Bouton Voir la recette en detail */}
+        <Link
+          to={`/recette/${recipe._id}`}
+          style={buttonStyle}
+        >
+          Voir la recette
+        </Link>
       </div>
     </div>
   );
@@ -64,4 +70,15 @@ const timeStyle = {
   color: "#495057",
   fontWeight: "500",
   margin: 0,
+};
+
+const buttonStyle = {
+  display: "inline-block",
+  marginTop: "10px",
+  padding:"7px 8px",
+  backgroundColor: "#0d6efd",
+  color: "#fff",
+  borderRadius: "4px",
+  textDecoration: "none",
+  fontWeight: "bold",
 };
