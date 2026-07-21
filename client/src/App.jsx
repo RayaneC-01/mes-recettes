@@ -8,7 +8,7 @@ import Home from "./pages/Home";
 //barre de recherche + filtres
 import SearchBar from "./components/SearchBar";
 import AddRecipe from './pages/AddRecipe';
-// import RecipeDetail from './pages/RecipeDetail';
+import RecipeDetail from './pages/RecipeDetail';
 // import EditRecipe from './pages/EditRecipe';
 
 function App() {
@@ -23,7 +23,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/search" element={<SearchBar />} />
           <Route path="/ajouter" element={<AddRecipe />} />
-          {/* <Route path="/recette/:id" element={<RecipeDetail />} /> */}
+          <Route path="/recette/:id" element={<RecipeDetail />} />
           {/* <Route path="/modifier/:id" element={<EditRecipe />} /> */}
         </Routes>
       </BrowserRouter>
