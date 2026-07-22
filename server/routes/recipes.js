@@ -4,9 +4,10 @@
 const express = require("express");
 const router = express.Router();
 const Recipe = require("../models/Recipe");
+const auth = require("./auth"); 
 
 // ==========================================
-// 1. LIRE TOUTES LES RECETTES (GET /)
+// 1. LIRE TOUTES LES RECETTES (GET /) - Public
 // ==========================================
 router.get("/", async (req, res) => {
   try {
@@ -21,7 +22,7 @@ router.get("/", async (req, res) => {
 });
 
 // ==========================================
-// 2. LIRE UNE SEULE RECETTE (GET /:id)
+// 2. LIRE UNE SEULE RECETTE (GET /:id) - Public
 // ==========================================
 router.get("/:id", async (req, res) => {
   try {
@@ -38,17 +39,20 @@ router.get("/:id", async (req, res) => {
 });
 
 // ==========================================
-// 3. CRÉER UNE NOUVELLE RECETTE (POST /)
+// 3. CRÉER UNE NOUVELLE RECETTE (POST /) - Protégé par auth
 // ==========================================
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
-    const { title, category, prepTime, ingredients, instructions, image, author } = req.body;
+    const { title, category, prepTime, ingredients, instructions, image } = req.body;
 
-    if (!title || !category || !prepTime || !ingredients || !instructions || !author) {
+    if (!title || !category || !prepTime || !ingredients || !instructions) {
       return res.status(400).json({ 
-        message: "Tous les champs obligatoires (title, category, prepTime, ingredients, instructions, author) doivent être remplis." 
+        message: "Tous les champs obligatoires (title, category, prepTime, ingredients, instructions) doivent être remplis." 
       });
     }
+
+    // L'auteur est automatiquement extrait du token grâce au middleware auth
+    const author = req.user.id;
 
     const newRecipe = await Recipe.create({
       title,
@@ -72,9 +76,9 @@ router.post("/", async (req, res) => {
 });
 
 // ==========================================
-// 4. METTRE À JOUR UNE RECETTE (PUT /:id)
+// 4. METTRE À JOUR UNE RECETTE (PUT /:id) - Protégé par auth + auteur
 // ==========================================
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
     const { title, category, prepTime, ingredients, instructions, image } = req.body;
@@ -85,15 +89,21 @@ router.put("/:id", async (req, res) => {
       });
     }
 
+    const recipe = await Recipe.findById(id);
+    if (!recipe) {
+      return res.status(404).json({ message: "Recette non trouvée !" });
+    }
+
+    // Vérification : L'utilisateur connecté est-il l'auteur ?
+    if (recipe.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Action non autorisée : Vous n'êtes pas l'auteur de cette recette." });
+    }
+
     const updatedRecipe = await Recipe.findByIdAndUpdate(
       id,
       { title, category, prepTime, ingredients, instructions, image },
       { new: true, runValidators: true }
     );
-
-    if (!updatedRecipe) {
-      return res.status(404).json({ message: "Recette non trouvée !" });
-    }
 
     res.status(200).json(updatedRecipe);
   } catch (error) {
@@ -106,22 +116,28 @@ router.put("/:id", async (req, res) => {
 });
 
 // ==========================================
-// 4.1 MISE À JOUR PARTIELLE (PATCH /:id)
+// 4.1 MISE À JOUR PARTIELLE (PATCH /:id) - Protégé par auth + auteur
 // ==========================================
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+
+    const recipe = await Recipe.findById(id);
+    if (!recipe) {
+      return res.status(404).json({ message: "Recette non trouvée !" });
+    }
+
+    // Vérification : L'utilisateur connecté est-il l'auteur ?
+    if (recipe.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Action non autorisée : Vous n'êtes pas l'auteur de cette recette." });
+    }
 
     const updatedRecipe = await Recipe.findByIdAndUpdate(
       id,
       { $set: updates },
       { new: true, runValidators: true }
     );
-
-    if (!updatedRecipe) {
-      return res.status(404).json({ message: "Recette non trouvée !" });
-    }
 
     res.status(200).json(updatedRecipe);
   } catch (error) {
@@ -134,15 +150,23 @@ router.patch("/:id", async (req, res) => {
 });
 
 // ==========================================
-// 5. SUPPRIMER UNE RECETTE (DELETE /:id)
+// 5. SUPPRIMER UNE RECETTE (DELETE /:id) - Protégé par auth + auteur
 // ==========================================
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedRecipe = await Recipe.findByIdAndDelete(id);
-    if (!deletedRecipe) {
+
+    const recipe = await Recipe.findById(id);
+    if (!recipe) {
       return res.status(404).json({ message: "Recette non trouvée !" });
     }
+
+    // Vérification : L'utilisateur connecté est-il l'auteur ?
+    if (recipe.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Action non autorisée : Vous n'êtes pas l'auteur de cette recette." });
+    }
+
+    await Recipe.findByIdAndDelete(id);
     res.status(200).json({ message: "Recette supprimée avec succès" });
   } catch (error) {
     console.error(error);
