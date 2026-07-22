@@ -5,6 +5,7 @@ import CategoryFilter from "../components/CategoryFilter";
 import RecipeCard from "../components/RecipeCard";
 import BtnTop from "../components/btnTop";
 
+
 export default function Home() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
