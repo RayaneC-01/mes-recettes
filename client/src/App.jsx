@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
-
+import "./index.css";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -9,7 +9,7 @@ import Home from "./pages/Home";
 import SearchBar from "./components/SearchBar";
 import AddRecipe from './pages/AddRecipe';
 import RecipeDetail from './pages/RecipeDetail';
-// import EditRecipe from './pages/EditRecipe';
+import EditRecipe from './pages/EditRecipe';
 
 function App() {
   return (
@@ -24,7 +24,7 @@ function App() {
           <Route path="/search" element={<SearchBar />} />
           <Route path="/ajouter" element={<AddRecipe />} />
           <Route path="/recette/:id" element={<RecipeDetail />} />
-          {/* <Route path="/modifier/:id" element={<EditRecipe />} /> */}
+          <Route path="/modifier/:id" element={<EditRecipe />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
