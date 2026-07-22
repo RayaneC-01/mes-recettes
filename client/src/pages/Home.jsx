@@ -3,7 +3,7 @@ import Animation from "../Animation";
 import SearchBar from "../components/SearchBar";
 import CategoryFilter from "../components/CategoryFilter";
 import RecipeCard from "../components/RecipeCard";
-
+import BtnTop from "../components/btnTop";
 
 export default function Home() {
   const [recipes, setRecipes] = useState([]);
@@ -77,13 +77,18 @@ export default function Home() {
                 Aucune recette ne correspond à votre recherche.
               </p>
             ) : (
-                // Affichage des recettes filtrées ou Toutes les recettes si aucun filtre n'est appliqué
+              // Affichage des recettes filtrées ou Toutes les recettes si aucun filtre n'est appliqué
               filteredRecipes.map((recipe) => (
                 <RecipeCard key={recipe._id} recipe={recipe} />
               ))
             )}
           </div>
         )}
+
+        {/* Bouton pour remonter en haut de la page */}
+        <BtnTop
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        />
       </div>
     </div>
   );
@@ -131,4 +136,3 @@ const gridStyle = {
   width: "100%",
   marginTop: "10px",
 };
-
