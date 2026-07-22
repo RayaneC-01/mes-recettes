@@ -1,12 +1,20 @@
 // Detail complet d'une recette (accessible à tous)
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+// Modal de confirmation de suppression
+import DeleteModal from "../components/delete_modal";
 
 export default function RecipeDetail() {
   const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Etat pour gérer l'affichage du modal de suppression
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 1. On récupère l'utilisateur actuellement connecté
+  const currentUser = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -16,7 +24,9 @@ export default function RecipeDetail() {
         if (response.ok) {
           setRecipe(data);
         } else {
-          setError(data.message || "Erreur lors de la récupération de la recette");
+          setError(
+            data.message || "Erreur lors de la récupération de la recette"
+          );
         }
       } catch (err) {
         console.error("Erreur lors de la récupération de la recette :", err);
@@ -28,6 +38,7 @@ export default function RecipeDetail() {
     fetchRecipe();
   }, [id]);
 
+  // 2. Affichage pendant le chargement (recipe est null ici, donc on s'arrête)
   if (loading) {
     return (
       <div style={statusContainerStyle}>
@@ -36,14 +47,24 @@ export default function RecipeDetail() {
     );
   }
 
+  // 3. Affichage en cas d'erreur ou si la recette n'existe pas
   if (error || !recipe) {
     return (
       <div style={statusContainerStyle}>
         <div style={errorStyle}>{error || "Recette introuvable"}</div>
-        <Link to="/" style={backButtonStyle}>← Retour à l'accueil</Link>
+        <Link to="/" style={backButtonStyle}>
+          ← Retour à l'accueil
+        </Link>
       </div>
     );
   }
+
+  // 4. ICI, ON EST SÛR QUE `recipe` EXISTE ET N'EST PAS NULL !
+  // On récupère l'ID de l'auteur (que recipe.author soit un objet ou un string)
+  const authorId = recipe.author?._id || recipe.author;
+
+  // On vérifie si l'utilisateur connecté est l'auteur
+  const isAuthor = currentUser && authorId && currentUser._id === authorId;
 
   // Découpage propre par saut de ligne (filtre les lignes vides)
   const instructionsList = recipe.instructions
@@ -65,6 +86,24 @@ export default function RecipeDetail() {
         {/* Titre & Badges */}
         <h1 style={titleStyle}>{recipe.title}</h1>
 
+        {/* Boutons affichés UNIQUEMENT si isAuthor est true ! */}
+        {isAuthor && (
+          <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+            <Link to={`/modifier/${recipe._id}`} style={editButtonStyle}>
+              ✏️ Modifier la recette
+            </Link>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              style={deleteTriggerButtonStyle}
+            >
+              🗑️ Supprimer
+            </button>
+          </div>
+        )}
+
+        {/* Modal affiché seulement si isModalOpen === true */}
+        {isModalOpen && <DeleteModal onClose={() => setIsModalOpen(false)} />}
+
         <div style={badgeContainerStyle}>
           <span style={categoryBadgeStyle}>{recipe.category}</span>
           <span style={timeBadgeStyle}>⏱️ {recipe.prepTime} min</span>
@@ -78,7 +117,12 @@ export default function RecipeDetail() {
         {/* Auteur */}
         {recipe.author && (
           <p style={authorStyle}>
-            Recette proposée par <strong>{recipe.author.username || recipe.author.name || "un chef anonyme"}</strong>
+            Recette proposée par{" "}
+            <strong>
+              {recipe.author.username ||
+                recipe.author.name ||
+                "un chef anonyme"}
+            </strong>
           </p>
         )}
 
@@ -109,6 +153,8 @@ export default function RecipeDetail() {
             ))}
           </ol>
         </div>
+
+        <hr style={separatorStyle} />
       </article>
     </div>
   );
@@ -266,4 +312,27 @@ const backButtonStyle = {
   borderRadius: "6px",
   textDecoration: "none",
   fontWeight: "bold",
+};
+
+const deleteTriggerButtonStyle = {
+  backgroundColor: "#dc3545",
+  color: "#fff",
+  border: "none",
+  padding: "8px 16px",
+  borderRadius: "6px",
+  cursor: "pointer",
+  fontWeight: "bold",
+  marginBottom: "20px",
+};
+
+const editButtonStyle = {
+  backgroundColor: "#0d6efd",
+  color: "#fff",
+  border: "none",
+  padding: "8px 16px",
+  borderRadius: "6px",
+  cursor: "pointer",
+  fontWeight: "bold",
+  marginBottom: "20px",
+  textDecoration: "none",
 };
