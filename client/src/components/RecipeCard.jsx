@@ -1,30 +1,59 @@
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function RecipeCard({ recipe }) {
   const navigate = useNavigate();
+  // 1. État pour suivre le survol de la carte
+  const [isHovered, setIsHovered] = useState(false);
+
+  // 2. Styles dynamiques combinés avec le hover
+  const combinedCardStyle = {
+    ...cardStyle,
+    transform: isHovered ? "translateY(-6px)" : "translateY(0)",
+    boxShadow: isHovered
+      ? "0 10px 20px rgba(0, 0, 0, 0.15)"
+      : "0 2px 5px rgba(0, 0, 0, 0.05)",
+  };
+
+  const combinedImageStyle = {
+    ...imageStyle,
+    transform: isHovered ? "scale(1.03)" : "scale(1)",
+  };
 
   return (
-    <div style={cardStyle} onClick={() => navigate(`/recette/${recipe._id}`)}>
-        {/* Image de chaque recette */}
+    <div
+      style={combinedCardStyle}
+      onClick={() => navigate(`/recette/${recipe._id}`)}
+      // 3. Déclencheurs de l'animation au survol
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Image de chaque recette */}
       {recipe.image ? (
-        <img src={recipe.image} alt={recipe.title} style={imageStyle} />
-        ) : (
-        <div style={{ ...imageStyle, backgroundColor: "#f8f9fa", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <img src={recipe.image} alt={recipe.title} style={combinedImageStyle} />
+      ) : (
+        <div
+          style={{
+            ...imageStyle,
+            backgroundColor: "#f8f9fa",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <span style={{ color: "#6c757d" }}>Aucune image disponible</span>
         </div>
       )}
+
       <div style={{ padding: "15px" }}>
         <h3 style={titleStyle}>{recipe.title}</h3>
         <span style={badgeStyle}>{recipe.category}</span>
 
         {/* Temps de préparation (si présent) */}
         {recipe.prepTime && <p style={timeStyle}>⏱️ {recipe.prepTime} mins</p>}
-        {/*Bouton Voir la recette en detail */}
-        <Link
-          to={`/recette/${recipe._id}`}
-          style={buttonStyle}
-        >
+
+        {/* Bouton Voir la recette en détail */}
+        <Link to={`/recette/${recipe._id}`} style={buttonStyle}>
           Voir la recette
         </Link>
       </div>
@@ -36,20 +65,21 @@ export default function RecipeCard({ recipe }) {
 const cardStyle = {
   backgroundColor: "#ffffff",
   borderRadius: "8px",
-  border: "1px solid #dee2e6",
+  border: "1px solid #dee2e6", // Réduit un peu la bordure de 5px à 1px pour un rendu plus moderne !
   textAlign: "left",
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
   cursor: "pointer",
   overflow: "hidden",
-  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+  transition: "all 0.3s ease", // Animation fluide
 };
 
 const imageStyle = {
   width: "100%",
   height: "150px",
   objectFit: "cover",
+  transition: "transform 0.3s ease", // Animation fluide pour le zoom image
 };
 
 const titleStyle = {
@@ -75,7 +105,7 @@ const timeStyle = {
 const buttonStyle = {
   display: "inline-block",
   marginTop: "10px",
-  padding:"7px 8px",
+  padding: "7px 8px",
   backgroundColor: "#0d6efd",
   color: "#fff",
   borderRadius: "4px",
