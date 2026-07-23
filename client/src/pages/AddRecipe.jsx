@@ -8,50 +8,45 @@ export default function AddRecipe() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleCreateRecipe = async (formData) => {
-    // Réinitialisation des messages
-    setSuccessMessage("");
-    setErrorMessage("");
+  setSuccessMessage("");
+  setErrorMessage("");
 
-    try {
-      const token = localStorage.getItem("token");
-      const user = JSON.parse(localStorage.getItem("user"));
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
 
-      const recipeData = {
-        ...formData,
-        author: user?._id || user?.id,
-      };
+    // On prépare les données en incluant l'ID de l'auteur
+    const recipeData = {
+      ...formData,
+      author: user?._id || user?.id,
+    };
 
-      const response = await fetch("http://localhost:5000/api/recipes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(recipeData),
-      });
+    const response = await fetch("http://localhost:5000/api/recipes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(recipeData),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (response.ok) {
-        // 1. Afficher le message de succès dans la page
-        setSuccessMessage("🎉 Recette ajoutée avec succès ! Redirection en cours...");
-        
-        // 2. Attendre 2 secondes avant de rediriger vers l'accueil
-        setTimeout(() => {
-          navigate("/");
-        }, 2000);
-      } else {
-        setErrorMessage(data.message || "Erreur lors de l'ajout de la recette");
-      }
-    } catch (error) {
-      console.error("Erreur :", error);
-      setErrorMessage("Impossible de se connecter au serveur");
+    if (response.ok) {
+      setSuccessMessage("🎉 Recette ajoutée avec succès ! Redirection...");
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+    } else {
+      setErrorMessage(data.message || "Erreur lors de l'ajout de la recette");
     }
-  };
+  } catch (error) {
+    console.error("Erreur :", error);
+    setErrorMessage("Impossible de se connecter au serveur");
+  }
+};
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
-      <h1 style={{ textAlign: "center" }}>Ajouter une recette</h1>
+    <div style={containerStyle}>
+      <h1 style={{ marginBottom: "25px", textAlign: "center" }}>Ajouter une recette</h1>
 
       {/* Message de succès stylisé */}
       {successMessage && (
@@ -72,7 +67,22 @@ export default function AddRecipe() {
   );
 }
 
-// Styles simples pour les notifications
+// ==========================================
+// STYLES DU CONTENEUR (Identiques à EditRecipe)
+// ==========================================
+const containerStyle = {
+  width: "100%",
+  maxWidth: "800px",
+  margin: "0 auto",
+  padding: "30px 20px",
+  backgroundColor: "#ffffff",
+  borderRadius: "12px",
+  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+  border: "1px solid #eaeaea",
+  boxSizing: "border-box",
+};
+
+// Styles pour les notifications
 const successStyle = {
   backgroundColor: "#d4edda",
   color: "#155724",
