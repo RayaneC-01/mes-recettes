@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import "./index.css";
@@ -14,7 +14,7 @@ import EditRecipe from './pages/EditRecipe';
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <Router>
         <Navbar />
         <Routes>
           {/* L'ordre n'impacte pas le fonctionnement */}
@@ -26,7 +26,7 @@ function App() {
           <Route path="/recette/:id" element={<RecipeDetail />} />
           <Route path="/modifier/:id" element={<EditRecipe />} />
         </Routes>
-      </BrowserRouter>
+      </Router>
     </AuthProvider>
   );
 }
