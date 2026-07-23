@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const Recipe = require("../models/Recipe");
-const auth = require("./auth"); // Ton middleware d'authentification
 
 // ==========================================
 // 1. LIRE TOUTES LES RECETTES (GET /)
@@ -32,12 +31,16 @@ router.get("/:id", async (req, res) => {
 // ==========================================
 // 3. CRÉER UNE RECETTE (POST /)
 // ==========================================
-router.post("/", auth, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const { title, category, prepTime, ingredients, instructions, image } = req.body;
+    const { title, category, prepTime, ingredients, instructions, image, author } = req.body;
 
     if (!title || !category || !prepTime || !ingredients || !instructions) {
       return res.status(400).json({ message: "Tous les champs requis doivent être remplis." });
+    }
+
+    if (!author) {
+      return res.status(400).json({ message: "Auteur non spécifié." });
     }
 
     const newRecipe = await Recipe.create({
@@ -47,28 +50,23 @@ router.post("/", auth, async (req, res) => {
       ingredients,
       instructions,
       image,
-      author: req.user.id || req.user._id // Récupère automatiquement l'ID de l'utilisateur connecté
+      author // Récupère l'ID envoyé par le frontend
     });
 
     res.status(201).json(newRecipe);
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la création de la recette." });
+    console.error("❌ Erreur POST / :", error);
+    res.status(500).json({ message: error.message || "Erreur lors de la création de la recette." });
   }
 });
 
 // ==========================================
 // 4. MODIFIER UNE RECETTE (PUT /:id)
 // ==========================================
-router.put("/:id", auth, async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ message: "Recette introuvable !" });
-
-    // Vérification simple : L'utilisateur connecté doit être l'auteur
-    const currentUserId = (req.user.id || req.user._id).toString();
-    if (recipe.author.toString() !== currentUserId) {
-      return res.status(403).json({ message: "Action non autorisée : Vous n'êtes pas l'auteur." });
-    }
 
     const updatedRecipe = await Recipe.findByIdAndUpdate(
       req.params.id,
@@ -85,16 +83,10 @@ router.put("/:id", auth, async (req, res) => {
 // ==========================================
 // 5. SUPPRIMER UNE RECETTE (DELETE /:id)
 // ==========================================
-router.delete("/:id", auth, async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ message: "Recette introuvable !" });
-
-    // Vérification simple : L'utilisateur connecté doit être l'auteur
-    const currentUserId = (req.user.id || req.user._id).toString();
-    if (recipe.author.toString() !== currentUserId) {
-      return res.status(403).json({ message: "Action non autorisée : Vous n'êtes pas l'auteur." });
-    }
 
     await Recipe.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Recette supprimée avec succès." });
