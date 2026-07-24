@@ -3,30 +3,33 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-const authRoutes = require('./routes/auth');
-const recipeRoutes = require('./routes/recipes');
-// 2. Initialisation de l'application Express
-const app = express();
+const authRoutes = require('./routes/auth'); // Routes pour login / register
+const recipeRoutes = require('./routes/recipes'); // Routes pour CRUD des recettes 
 
-// 3. Middlewares de base
-// Autorise le Frontend (React) à appeler l'API
-app.use(cors());
-// Permet à Express de lire le format JSON dans les requêtes
-app.use(express.json());
-
-// 4. Définition des routes
-app.use('/api/auth', authRoutes);
-app.use('/api/recipes', recipeRoutes);
+// 2. INITIALISATION DE L'APPLICATION
+const app = express(); // Crée l'application serveur Express
 
 
-// 4. Connexion à MongoDB via Mongoose
+// 3. MIDDLEWARES
+app.use(cors()); // Autorise les requêtes provenant d'un autre domaine (comme GitHub Pages ou React local)
+app.use(express.json()); // Indique à Express de traduire automatiquement le JSON reçu dans req.body
+
+
+
+// 4. CONNEXION À LA BASE DE DONNÉES (MONGODB)
+// Se connecte à MongoDB en utilisant l'adresse sécurisée stockée dans le .env
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Connexion à MongoDB réussie !'))
   .catch((err) => console.error('❌ Erreur de connexion à MongoDB :', err));
 
-// 5. Route de test pour vérifier que le serveur fonctionne
+
+// 5. DÉFINITION DES ROUTES DE L'API
+app.use('/api/auth', authRoutes); // Redirige les URL commençant par /api/auth vers le fichier auth.js
+app.use('/api/recipes', recipeRoutes); // Redirige les URL commençant par /api/recipes vers le fichier recipes.js
+
+// Route de test simple pour vérifier que le serveur répond sur le navigateur
 app.get('/', (req, res) => {
-  res.send('Le serveur de MesRecettes tourne nickel !');
+  res.send('Le serveur de MesRecettes tourne correctement.');
 });
 
 // 6. Lancement du serveur Express sur le port configuré
