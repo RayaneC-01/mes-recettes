@@ -5,8 +5,9 @@ import { AuthContext } from "../context/AuthContext";
 function Register() {
   const navigate = useNavigate();
   // Extraction propre de la fonction login depuis le contexte
-  const { login } = useContext(AuthContext); 
+  const { login } = useContext(AuthContext);
 
+  // État pour gérer les données du formulaire
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -16,24 +17,25 @@ function Register() {
     password: "",
     confirmPassword: "",
   });
-
+  // État pour gérer les erreurs, le chargement et l'affichage des mots de passe
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Fonction pour gérer les changements dans les champs du formulaire
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
-
+  // Fonction pour gérer la soumission du formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // 1. Validations Frontend
+    // Validation des champs du formulaire
     if (
       !formData.firstName ||
       !formData.lastName ||
@@ -45,18 +47,19 @@ function Register() {
       setError("Tous les champs sont obligatoires.");
       return;
     }
-
+    // Validation du mot de passe
     if (formData.password.length < 6 || formData.password.length > 20) {
       setError("Le mot de passe doit contenir entre 6 et 20 caractères.");
       return;
     }
-
+    // Validation de la correspondance des mots de passe
     if (formData.password !== formData.confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
       return;
     }
 
     try {
+      // Indiquer que le processus est en cours
       setLoading(true);
 
       // ÉTAPE 1 : Requête d'inscription
@@ -74,7 +77,7 @@ function Register() {
           password: formData.password,
         }),
       });
-      
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -108,18 +111,17 @@ function Register() {
         password: "",
         confirmPassword: "",
       });
-
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
-    }  
+    }
   };
 
   return (
     <div style={containerStyle}>
       <form onSubmit={handleSubmit} style={formStyle}>
-        <h2 style={titleStyle}>Créer un compte 🍳</h2>
+        <h2 style={titleStyle}>Créer un compte </h2>
 
         {error && <div style={errorAlertStyle}>{error}</div>}
 
@@ -281,13 +283,14 @@ const inputStyle = {
   borderRadius: "6px",
   fontSize: "1rem",
   color: "#212529",
+  width: "85%",
 };
 
 const inputContainerStyle = {
   position: "relative",
   display: "flex",
   alignItems: "center",
-  width: "100%",
+  width: "85%",
 };
 
 const inputWithBtnStyle = {
