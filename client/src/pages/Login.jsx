@@ -1,27 +1,30 @@
 import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 // Importation du contexte pour gérer l'authentification
-import { AuthContext } from "../context/AuthContext"; 
+import { AuthContext } from "../context/AuthContext";
 
 function Login() {
   // Utilisation de useNavigate pour rediriger après la connexion
   const navigate = useNavigate();
-  // Récupération de la fonction login depuis le contexte AuthContext
-  const { login } = useContext(AuthContext); 
 
-  // États pour les champs, les erreurs et le chargement
+  // Récupération de la fonction login depuis le contexte AuthContext
+  const { login } = useContext(AuthContext);
+
+  // 1. (State) États pour les champs, les erreurs et le chargement
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   // État pour afficher/masquer le mot de passe
   const [showPassword, setShowPassword] = useState(false);
 
+  // 2. GESTION DE LA SOUMISSION DU FORMULAIRE
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    // Validation des champs
     if (!email || !password) {
       setError("L'email et le mot de passe sont obligatoires.");
       return;
@@ -30,8 +33,7 @@ function Login() {
     try {
       setLoading(true);
 
-      // On utilise la fonction login du contexte
-      // Elle se charge de faire le fetch, de stocker les données et de mettre à jour l'état global
+      // Appel de la fonction login du contexte AuthContext, await pour gérer la promesse
       const success = await login({ email, password });
 
       if (!success) {
@@ -47,6 +49,7 @@ function Login() {
     }
   };
 
+  // 3. RENDU DU FORMULAIRE DE CONNEXION
   return (
     <div style={containerStyle}>
       <form onSubmit={handleSubmit} style={formStyle}>
@@ -85,6 +88,17 @@ function Login() {
             </button>
           </div>
         </div>
+        {
+          /* Chemin pas de compte? Creer un compte */
+          <div style={NewAccountStyle}>
+            <p>
+              Pas de compte ?{" "}
+              <Link to="/register" style={linkStyle}>
+                Créez-en un ici
+              </Link>
+            </p>
+          </div>
+        }
 
         <button type="submit" disabled={loading} style={btnPrimaryStyle}>
           {loading ? "Connexion en cours..." : "Se connecter"}
@@ -94,9 +108,7 @@ function Login() {
   );
 }
 
-// ==========================================
-// STYLES CSS (Identiques à Register)
-// ==========================================
+// 4. STYLES CSS-IN-JS
 const containerStyle = {
   display: "flex",
   justifyContent: "center",
@@ -197,6 +209,18 @@ const eyeButtonStyle = {
   letterSpacing: "0.5px",
   padding: "4px 8px",
   borderRadius: "4px",
+};
+
+const NewAccountStyle = {
+  textAlign: "center",
+  marginBottom: "15px",
+  fontSize: "1.1rem",
+};
+
+const linkStyle = {
+  color: "#0d6efd",
+  textDecoration: "none",
+  fontWeight: "600",
 };
 
 export default Login;
