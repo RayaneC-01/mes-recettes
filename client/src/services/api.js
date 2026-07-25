@@ -7,9 +7,11 @@ const BASE_URL = "http://localhost:5000/api";
 // ==========================================
 
 // Inscription d'un utilisateur
- export const registerUser = async (userData) => {
+export const registerUser = async (userData) => {
+    // Envoyer une requête POST à l'API pour créer un nouvel utilisateur
     const response = await fetch(`${BASE_URL}/auth/register`, {
         method: "POST",
+        // Spécifier que le corps de la requête est au format JSON
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
     });
@@ -17,7 +19,7 @@ const BASE_URL = "http://localhost:5000/api";
 };
 
 // Connexion d'un utilisateur
-    export const loginUser = async (credentials) => {
+export const loginUser = async (credentials) => {
     const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
