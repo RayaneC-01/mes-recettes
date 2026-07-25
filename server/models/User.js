@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-// 1. Définition du plan (Schéma) de l'utilisateur
+// 1. Définition du plan de l'utilisateur
 const userSchema = new mongoose.Schema({
     firstName: { type: String, required: [true, 'Le prénom est requis'] },
     lastName: { type: String, required: [true, 'Le nom de famille est requis'] },
@@ -18,7 +18,7 @@ userSchema.pre('save', async function () {
     if (!this.isModified('password')) return;
 
     try {
-        // Hachage du mot de passe (exemple avec bcrypt)
+        // Hachage du mot de passe et génération du "sel" aléoatoire de complexité 10
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
     } catch (error) {
