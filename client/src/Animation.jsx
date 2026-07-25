@@ -12,12 +12,13 @@ function Animation() {
       "#81d4fa", // Bleu Ciel (légèreté, propreté)
       "#fff8e1", // Crème (douceur, base)
     ];
-
+    // Générer un tableau de 7 cercles avec des propriétés aléatoires
     return Array.from({ length: 7 }).map((_, i) => ({
+      // Propriétés aléatoires pour chaque cercle
       id: i,
-      size: Math.random() * 300 + 400, 
-      left: Math.random() * 90 - 5, 
-      top: Math.random() * 90 - 5, 
+      size: Math.random() * 300 + 400,
+      left: Math.random() * 90 - 5,
+      top: Math.random() * 90 - 5,
       color: gourmetColors[i % gourmetColors.length],
       // Vitesse douce et apaisante (15s à 25s)
       duration: 15 + Math.random() * 10,
@@ -79,15 +80,15 @@ function Animation() {
   );
 }
 
-// Style du conteneur parent 
+// Style du conteneur parent
 const backgroundWrapperStyle = {
-  position: "fixed", 
+  position: "fixed",
   top: 0,
   left: 0,
   width: "100vw",
   height: "100vh",
   overflow: "hidden",
-  zIndex: 0, 
+  zIndex: 0,
   pointerEvents: "none",
 };
 
