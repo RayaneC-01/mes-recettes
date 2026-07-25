@@ -1,11 +1,17 @@
-// Detail complet d'une recette (accessible à tous)
+// ==========================================
+// COMPOSANT : DETAIL D'UNE RECETTE
+// IMPORTATIONS
+// ==========================================
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-// Modal de confirmation de suppression
-import DeleteModal from "../components/delete_modal";
+import DeleteModal from "../components/delete_modal"; // Modal de confirmation de suppression
 
 export default function RecipeDetail() {
+  // Récupération de l'ID passé dans l'URL (/recette/:id)
   const { id } = useParams();
+
+  // ÉTATS LOCAUX
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,19 +19,22 @@ export default function RecipeDetail() {
   // Etat pour gérer l'affichage du modal de suppression
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 1. On récupère l'utilisateur actuellement connecté
+  // Récupération de l'utilisateur connecté depuis le LocalStorage
   const currentUser = JSON.parse(localStorage.getItem("user"));
 
+  // 1. CHARGEMENT DE LA RECETTE DEPUIS L'API
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
+        // Appel à l'API pour récupérer la recette par ID
         const response = await fetch(`http://localhost:5000/api/recipes/${id}`);
+        // On parse la réponse JSON
         const data = await response.json();
         if (response.ok) {
           setRecipe(data);
         } else {
           setError(
-            data.message || "Erreur lors de la récupération de la recette"
+            data.message || "Erreur lors de la récupération de la recette",
           );
         }
       } catch (err) {
@@ -38,7 +47,7 @@ export default function RecipeDetail() {
     fetchRecipe();
   }, [id]);
 
-  // 2. Affichage pendant le chargement (recipe est null ici, donc on s'arrête)
+  // 2. Affichage pendant le chargement
   if (loading) {
     return (
       <div style={statusContainerStyle}>
@@ -47,7 +56,7 @@ export default function RecipeDetail() {
     );
   }
 
-  // 3. Affichage en cas d'erreur ou si la recette n'existe pas
+  // 3. GESTION DES ERREURS ET RECETTE INTROUVABLE (GUARD CLAUSE)
   if (error || !recipe) {
     return (
       <div style={statusContainerStyle}>
@@ -59,14 +68,14 @@ export default function RecipeDetail() {
     );
   }
 
-  // 4. ICI, ON EST SÛR QUE `recipe` EXISTE ET N'EST PAS NULL !
-  // On récupère l'ID de l'auteur (que recipe.author soit un objet ou un string)
+  // 4. VÉRIFICATION DE LA PROPRIÉTÉ DE LA RECETTE
+  // Extrait l'ID de l'auteur que 'author' soit un objet populé ou une chaîne d'ID directe
   const authorId = recipe.author?._id || recipe.author;
 
   // On vérifie si l'utilisateur connecté est l'auteur
   const isAuthor = currentUser && authorId && currentUser._id === authorId;
 
-  // Découpage propre par saut de ligne (filtre les lignes vides)
+  // Transforme les textes avec sauts de ligne (\n) en tableaux nettoyés pour l'affichage
   const instructionsList = recipe.instructions
     ? recipe.instructions.split("\n").filter((step) => step.trim() !== "")
     : [];
@@ -75,6 +84,7 @@ export default function RecipeDetail() {
     ? recipe.ingredients.split("\n").filter((item) => item.trim() !== "")
     : [];
 
+  // 5. RENDU DU COMPOSANT
   return (
     <div style={containerStyle}>
       {/* Bouton Retour */}
