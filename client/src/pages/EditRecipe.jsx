@@ -1,29 +1,30 @@
-// Formulaire de modification d'une recette
+// ==========================================
+// COMPOSANT : EDITION D'UNE RECETTE
+// ==========================================
 import { useContext, useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import RecipeForm from "../components/RecipeForm";
+import RecipeForm from "../components/RecipeForm"; // Formulaire réutilisable (Création / Edition)
 
 export default function EditRecipe() {
-  // 1. Récupérer l'ID de la recette depuis l'URL et initialiser le hook de navigation
-  const { id } = useParams();
-  // 2. Récupérer l'utilisateur connecté depuis le contexte
+  // 1. HOOKS ET CONTEXTE
+  const { id } = useParams(); // Récupération de l'ID de la recette depuis l'URL
   const navigate = useNavigate();
-  // 3. Récupérer l'utilisateur connecté depuis le contexte
-  const { user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext); // Utilisateur connecté globalement
 
+  // 2. ETATS LOCAUX
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 1. Redirection immédiate si l'utilisateur se déconnecte ou n'est pas connecté
+  // 3. PROTECTION : Redirection si l'utilisateur n'est pas connecté
   useEffect(() => {
     if (!user) {
       navigate("/login");
     }
   }, [user, navigate]);
 
-  // 2. Charger les données actuelles de la recette
+  // 4. CHARGEMENT DE LA RECETTE ET VERIFICATION DES DROITS
   useEffect(() => {
     const fetchRecipeDetails = async () => {
       try {
@@ -33,7 +34,7 @@ export default function EditRecipe() {
         if (response.ok) {
           setInitialData(data);
 
-          // Vérification de l'auteur une fois la recette chargée
+          // Vérification : Seul l'auteur a le droit d'accéder à cette page !
           const authorId = data.author?._id || data.author;
           if (user && authorId && user._id !== authorId) {
             alert("Vous n'avez pas l'autorisation de modifier cette recette.");
@@ -41,7 +42,7 @@ export default function EditRecipe() {
           }
         } else {
           setError(
-            data.message || "Erreur lors de la récupération de la recette"
+            data.message || "Erreur lors de la récupération de la recette",
           );
         }
       } catch (err) {
@@ -55,7 +56,7 @@ export default function EditRecipe() {
     fetchRecipeDetails();
   }, [id, user, navigate]);
 
-  // 3. Envoyer les modifications au backend (PUT avec Token d'authentification)
+  // 5. ENVOI DES MODIFICATIONS AU BACKEND (PUT)
   const handleSubmit = async (updatedRecipe) => {
     try {
       const token = localStorage.getItem("token"); // Récupère le token stocké
@@ -71,7 +72,7 @@ export default function EditRecipe() {
 
       if (response.ok) {
         console.log("Recette mise à jour avec succès !");
-        navigate(`/recette/${id}`);
+        navigate(`/recette/${id}`); // Redirection vers la fiche de la recette modifiée
       } else {
         const errorData = await response.json();
         alert(errorData.message || "Erreur lors de la mise à jour");
@@ -82,11 +83,13 @@ export default function EditRecipe() {
     }
   };
 
+  // 6. GESTION DES ETATS DE CHARGEMENT ET D'ERREUR (GUARD CLAUSES)
   if (loading)
     return <div style={statusStyle}>Chargement de la recette...</div>;
   if (error)
     return <div style={{ ...statusStyle, color: "#dc3545" }}>{error}</div>;
 
+  // 7. RENDU DU FORMULAIRE
   return (
     <div style={containerStyle}>
       <Link to={`/recette/${id}`} style={backLinkStyle}>
@@ -105,7 +108,7 @@ export default function EditRecipe() {
 }
 
 // ==========================================
-// STYLES DU CONTENEUR
+// 8. STYLES DU CONTENEUR
 // ==========================================
 const containerStyle = {
   width: "100%",
