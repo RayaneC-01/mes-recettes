@@ -1,4 +1,4 @@
-//Modal de suppreiosn pour la recette
+// MODAL DE CONFIRMATION DE SUPPRESSION D'UNE RECETTE
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function DeleteModal({ onClose }) {
