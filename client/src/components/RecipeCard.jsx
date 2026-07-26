@@ -20,12 +20,15 @@ export default function RecipeCard({ recipe }) {
     transform: isHovered ? "scale(1.03)" : "scale(1)",
   };
 
+  // 3. Rendu de la carte de recette
   return (
     <div
       style={combinedCardStyle}
+      // 4. Navigation vers la page de détails de la recette au clic
       onClick={() => navigate(`/recette/${recipe._id}`)}
       // 3. Déclencheurs de l'animation au survol
       onMouseEnter={() => setIsHovered(true)}
+      // 4. Réinitialisation de l'animation lorsque la souris quitte la carte
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image de chaque recette */}
