@@ -1,66 +1,67 @@
+// ==========================================
+// COMPOSANT : AJOUT D'UNE RECETTE
+// ==========================================
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RecipeForm from "../components/RecipeForm";
 
 export default function AddRecipe() {
+  // 1. HOOKS
   const navigate = useNavigate();
+  // 2. ETATS LOCAUX POUR LES MESSAGES DE SUCCES ET D'ERREUR
   const [successMessage, setSuccessMessage] = useState("");
+  // 3. ETATS LOCAUX POUR LES MESSAGES D'ERREUR
   const [errorMessage, setErrorMessage] = useState("");
-
+  
+  // 4. FONCTION POUR CREER UNE NOUVELLE RECETTE
   const handleCreateRecipe = async (formData) => {
-  setSuccessMessage("");
-  setErrorMessage("");
+    setSuccessMessage("");
+    setErrorMessage("");
 
-  try {
-    const user = JSON.parse(localStorage.getItem("user"));
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
 
-    // On prépare les données en incluant l'ID de l'auteur
-    const recipeData = {
-      ...formData,
-      author: user?._id || user?.id,
-    };
+      // On prépare les données en incluant l'ID de l'auteur
+      const recipeData = {
+        ...formData,
+        author: user?._id || user?.id,
+      };
 
-    const response = await fetch("http://localhost:5000/api/recipes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(recipeData),
-    });
+      const response = await fetch("http://localhost:5000/api/recipes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(recipeData),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      setSuccessMessage("🎉 Recette ajoutée avec succès ! Redirection...");
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
-    } else {
-      setErrorMessage(data.message || "Erreur lors de l'ajout de la recette");
+      if (response.ok) {
+        setSuccessMessage("🎉 Recette ajoutée avec succès ! Redirection...");
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
+      } else {
+        setErrorMessage(data.message || "Erreur lors de l'ajout de la recette");
+      }
+    } catch (error) {
+      console.error("Erreur :", error);
+      setErrorMessage("Impossible de se connecter au serveur");
     }
-  } catch (error) {
-    console.error("Erreur :", error);
-    setErrorMessage("Impossible de se connecter au serveur");
-  }
-};
+  };
 
   return (
     <div style={containerStyle}>
-      <h1 style={{ marginBottom: "25px", textAlign: "center" }}>Ajouter une recette</h1>
+      <h1 style={{ marginBottom: "25px", textAlign: "center" }}>
+        Ajouter une recette
+      </h1>
 
       {/* Message de succès stylisé */}
-      {successMessage && (
-        <div style={successStyle}>
-          {successMessage}
-        </div>
-      )}
+      {successMessage && <div style={successStyle}>{successMessage}</div>}
 
       {/* Message d'erreur stylisé */}
-      {errorMessage && (
-        <div style={errorStyle}>
-          {errorMessage}
-        </div>
-      )}
+      {errorMessage && <div style={errorStyle}>{errorMessage}</div>}
 
       <RecipeForm onSubmit={handleCreateRecipe} />
     </div>
