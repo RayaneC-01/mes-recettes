@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 export default function RecipeForm({ initialData, onSubmit }) {
+  // État local pour gérer les données du formulaire
   const [formData, setFormData] = useState({
     title: "",
     category: "Entrée",
@@ -78,7 +79,7 @@ export default function RecipeForm({ initialData, onSubmit }) {
             ))}
           </select>
         </div>
-
+        {/* Temps de préparation */}
         <div style={{ ...groupStyle, flex: 1 }}>
           <label style={labelStyle}>Temps (min) *</label>
           <input
