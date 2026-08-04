@@ -4,7 +4,7 @@ import SearchBar from "../components/SearchBar";
 import CategoryFilter from "../components/CategoryFilter";
 import RecipeCard from "../components/RecipeCard";
 import BtnTop from "../components/btnTop";
-
+import { BASE_URL } from "../services/api";
 
 export default function Home() {
   const [recipes, setRecipes] = useState([]);
@@ -18,7 +18,7 @@ export default function Home() {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/recipes");
+        const response = await fetch(`${BASE_URL}/recipes`);
         const data = await response.json();
         if (response.ok) {
           setRecipes(data);
@@ -49,28 +49,23 @@ export default function Home() {
       <Animation />
 
       <div style={contentWrapperStyle}>
-        <h1 style={titleStyle}>
-          Bienvenue sur MesRecettes ! <span>🍳</span>
-        </h1>
+        <h1 style={titleStyle}>Découvrez nos recettes</h1>
         <p style={subtitleStyle}>
-          Découvrez, créez et partagez vos meilleures inspirations culinaires.
+          Trouvez l'inspiration pour vos prochains repas parmi toutes nos créations gourmandes.
         </p>
 
-        {/* Barre de recherche (Composant séparé) */}
-        <SearchBar
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        {/* Barre de recherche */}
+        <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
-        {/* Filtres par catégories (Composant séparé) */}
+        {/* Filtre par catégorie */}
         <CategoryFilter
           selected={selectedCategory}
           onChange={setSelectedCategory}
         />
 
-        {/* Liste des recettes */}
+        {/* Gestion des états : Chargement vs Liste des recettes */}
         {loading ? (
-          <p style={{ marginTop: "30px" }}>Chargement des recettes... ⏳</p>
+          <div style={loadingStyle}>Chargement des délicieuses recettes...</div>
         ) : (
           <div style={gridStyle}>
             {filteredRecipes.length === 0 ? (
@@ -78,7 +73,6 @@ export default function Home() {
                 Aucune recette ne correspond à votre recherche.
               </p>
             ) : (
-              // Affichage des recettes filtrées ou Toutes les recettes si aucun filtre n'est appliqué
               filteredRecipes.map((recipe) => (
                 <RecipeCard key={recipe._id} recipe={recipe} />
               ))
@@ -119,21 +113,28 @@ const contentWrapperStyle = {
 };
 
 const titleStyle = {
-  fontSize: "3rem",
-  fontWeight: "800",
+  fontSize: "2.5rem",
+  fontWeight: "bold",
   color: "#212529",
-  marginBottom: "15px",
+  marginBottom: "10px",
 };
 
 const subtitleStyle = {
-  fontSize: "1.2rem",
-  color: "#495057",
+  fontSize: "1.1rem",
+  color: "#6c757d",
   marginBottom: "30px",
 };
+
 const gridStyle = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-  gap: "20px",
+  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+  gap: "25px",
   width: "100%",
-  marginTop: "10px",
+  marginTop: "20px",
+};
+
+const loadingStyle = {
+  fontSize: "1.2rem",
+  color: "#0d6efd",
+  marginTop: "40px",
 };
