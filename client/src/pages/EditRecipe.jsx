@@ -1,95 +1,86 @@
-// ==========================================
-// COMPOSANT : EDITION D'UNE RECETTE
-// ==========================================
 import { useContext, useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import RecipeForm from "../components/RecipeForm"; // Formulaire réutilisable (Création / Edition)
+import RecipeForm from "../components/RecipeForm";
+import { BASE_URL } from "../services/api";
 
 export default function EditRecipe() {
-  // 1. HOOKS ET CONTEXTE
-  const { id } = useParams(); // Récupération de l'ID de la recette depuis l'URL
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext); // Utilisateur connecté globalement
+  const { user } = useContext(AuthContext);
 
-  // 2. ETATS LOCAUX
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 3. PROTECTION : Redirection si l'utilisateur n'est pas connecté
   useEffect(() => {
     if (!user) {
       navigate("/login");
     }
   }, [user, navigate]);
 
-  // 4. CHARGEMENT DE LA RECETTE ET VERIFICATION DES DROITS
   useEffect(() => {
     const fetchRecipeDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/recipes/${id}`);
+        const response = await fetch(`${BASE_URL}/recipes/${id}`);
         const data = await response.json();
 
         if (response.ok) {
-          setInitialData(data);
-
-          // Vérification : Seul l'auteur a le droit d'accéder à cette page !
           const authorId = data.author?._id || data.author;
-          if (user && authorId && user._id !== authorId) {
-            alert("Vous n'avez pas l'autorisation de modifier cette recette.");
-            navigate("/");
+          const currentUserId = user?._id || user?.id;
+
+          if (authorId !== currentUserId) {
+            alert("Vous n'êtes pas autorisé à modifier cette recette.");
+            navigate(`/recette/${id}`);
+            return;
           }
+
+          setInitialData(data);
         } else {
-          setError(
-            data.message || "Erreur lors de la récupération de la recette",
-          );
+          setError(data.message || "Impossible de récupérer la recette");
         }
       } catch (err) {
-        console.error("Erreur lors de la récupération :", err);
-        setError("Impossible de contacter le serveur");
+        console.error("Erreur de chargement :", err);
+        setError("Erreur réseau lors de la récupération de la recette");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRecipeDetails();
+    if (user) {
+      fetchRecipeDetails();
+    }
   }, [id, user, navigate]);
 
-  // 5. ENVOI DES MODIFICATIONS AU BACKEND (PUT)
-  const handleSubmit = async (updatedRecipe) => {
+  const handleSubmit = async (formData) => {
     try {
-      const token = localStorage.getItem("token"); // Récupère le token stocké
-
-      const response = await fetch(`http://localhost:5000/api/recipes/${id}`, {
+      const response = await fetch(`${BASE_URL}/recipes/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Envoyé pour valider le middleware auth
         },
-        body: JSON.stringify(updatedRecipe),
+        body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        console.log("Recette mise à jour avec succès !");
-        navigate(`/recette/${id}`); // Redirection vers la fiche de la recette modifiée
+        alert("Recette mise à jour avec succès !");
+        navigate(`/recette/${id}`);
       } else {
-        const errorData = await response.json();
-        alert(errorData.message || "Erreur lors de la mise à jour");
+        alert(data.message || "Erreur lors de la mise à jour");
       }
     } catch (err) {
-      console.error("Erreur lors de la mise à jour :", err);
+      console.error("Erreur de mise à jour :", err);
       alert("Erreur de connexion au serveur");
     }
   };
 
-  // 6. GESTION DES ETATS DE CHARGEMENT ET D'ERREUR (GUARD CLAUSES)
   if (loading)
     return <div style={statusStyle}>Chargement de la recette...</div>;
   if (error)
     return <div style={{ ...statusStyle, color: "#dc3545" }}>{error}</div>;
 
-  // 7. RENDU DU FORMULAIRE
   return (
     <div style={containerStyle}>
       <Link to={`/recette/${id}`} style={backLinkStyle}>
@@ -107,9 +98,6 @@ export default function EditRecipe() {
   );
 }
 
-// ==========================================
-// 8. STYLES DU CONTENEUR
-// ==========================================
 const containerStyle = {
   width: "100%",
   maxWidth: "800px",
@@ -122,18 +110,12 @@ const containerStyle = {
   boxSizing: "border-box",
 };
 
-const formStyle = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "15px",
-};
-
 const backLinkStyle = {
   display: "inline-block",
   marginBottom: "15px",
-  color: "#0d6efd",
+  color: "#6c757d",
   textDecoration: "none",
-  fontWeight: "bold",
+  fontSize: "0.95rem",
 };
 
 const statusStyle = {
@@ -141,3 +123,5 @@ const statusStyle = {
   marginTop: "50px",
   fontSize: "1.2rem",
 };
+
+const formStyle = {};
