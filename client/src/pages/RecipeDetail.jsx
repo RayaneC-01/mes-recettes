@@ -1,66 +1,58 @@
-// ==========================================
-// COMPOSANT : DETAIL D'UNE RECETTE
-// IMPORTATIONS
-// ==========================================
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import DeleteModal from "../components/delete_modal"; // Modal de confirmation de suppression
+import DeleteModal from "../components/delete_modal";
+import { BASE_URL } from "../services/api";
 
 export default function RecipeDetail() {
-  // Récupération de l'ID passé dans l'URL (/recette/:id)
   const { id } = useParams();
 
-  // ÉTATS LOCAUX
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Etat pour gérer l'affichage du modal de suppression
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Récupération de l'utilisateur connecté depuis le LocalStorage
   const currentUser = JSON.parse(localStorage.getItem("user"));
 
-  // 1. CHARGEMENT DE LA RECETTE DEPUIS L'API
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
-        // Appel à l'API pour récupérer la recette par ID
-        const response = await fetch(`http://localhost:5000/api/recipes/${id}`);
-        // On parse la réponse JSON
+        const response = await fetch(`${BASE_URL}/recipes/${id}`);
         const data = await response.json();
         if (response.ok) {
           setRecipe(data);
         } else {
-          setError(
-            data.message || "Erreur lors de la récupération de la recette",
-          );
+          setError(data.message || "Recette introuvable.");
         }
       } catch (err) {
-        console.error("Erreur lors de la récupération de la recette :", err);
-        setError("Impossible de se connecter au serveur");
+        console.error("Erreur lors de la récupération de la recette:", err);
+        setError("Impossible de se connecter au serveur.");
       } finally {
         setLoading(false);
       }
     };
+
     fetchRecipe();
   }, [id]);
 
-  // 2. Affichage pendant le chargement
+  const isAuthor =
+    currentUser &&
+    recipe &&
+    (currentUser._id === recipe.author?._id ||
+      currentUser._id === recipe.author ||
+      currentUser.id === recipe.author);
+
   if (loading) {
     return (
       <div style={statusContainerStyle}>
-        <div style={loadingStyle}>⏳ Chargement de la recette...</div>
+        <div style={loadingStyle}>Chargement de la recette...</div>
       </div>
     );
   }
 
-  // 3. GESTION DES ERREURS ET RECETTE INTROUVABLE (GUARD CLAUSE)
   if (error || !recipe) {
     return (
       <div style={statusContainerStyle}>
-        <div style={errorStyle}>{error || "Recette introuvable"}</div>
+        <div style={errorStyle}>{error || "Recette non trouvée."}</div>
         <Link to="/" style={backButtonStyle}>
           ← Retour à l'accueil
         </Link>
@@ -68,205 +60,234 @@ export default function RecipeDetail() {
     );
   }
 
-  // 4. VÉRIFICATION DE LA PROPRIÉTÉ DE LA RECETTE
-  // Extrait l'ID de l'auteur que 'author' soit un objet populé ou une chaîne d'ID directe
-  const authorId = recipe.author?._id || recipe.author;
-
-  // On vérifie si l'utilisateur connecté est l'auteur
-  const isAuthor = currentUser && authorId && currentUser._id === authorId;
-
-  // Transforme les textes avec sauts de ligne (\n) en tableaux nettoyés pour l'affichage
-  const instructionsList = recipe.instructions
-    ? recipe.instructions.split("\n").filter((step) => step.trim() !== "")
-    : [];
-
-  const ingredientsList = recipe.ingredients
-    ? recipe.ingredients.split("\n").filter((item) => item.trim() !== "")
-    : [];
-
-  // 5. RENDU DU COMPOSANT
   return (
     <div style={containerStyle}>
-      {/* Bouton Retour */}
       <Link to="/" style={backLinkStyle}>
         ← Retour aux recettes
       </Link>
 
-      <article style={cardStyle}>
-        {/* Titre & Badges */}
-        <h1 style={titleStyle}>{recipe.title}</h1>
+      <div style={headerSectionStyle}>
+        <div style={titleGroupStyle}>
+          <span style={categoryBadgeStyle}>
+            {recipe.category || "Général"}
+          </span>
+          <h1 style={titleStyle}>{recipe.title}</h1>
+        </div>
 
-        {/* Boutons affichés UNIQUEMENT si isAuthor est true ! */}
         {isAuthor && (
-          <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-            <Link to={`/modifier/${recipe._id}`} style={editButtonStyle}>
-              ✏️ Modifier la recette
+          <div style={actionButtonsStyle}>
+            <Link to={`/modifier-recette/${recipe._id}`} style={editButtonStyle}>
+              Modifier
             </Link>
             <button
               onClick={() => setIsModalOpen(true)}
-              style={deleteTriggerButtonStyle}
+              style={deleteButtonStyle}
             >
-              🗑️ Supprimer
+              Supprimer
             </button>
           </div>
         )}
+      </div>
 
-        {/* Modal affiché seulement si isModalOpen === true */}
-        {isModalOpen && <DeleteModal onClose={() => setIsModalOpen(false)} />}
+      {recipe.imageUrl && (
+        <img
+          src={recipe.imageUrl}
+          alt={recipe.title}
+          style={imageStyle}
+        />
+      )}
 
-        <div style={badgeContainerStyle}>
-          <span style={categoryBadgeStyle}>{recipe.category}</span>
-          <span style={timeBadgeStyle}>⏱️ {recipe.prepTime} min</span>
+      <div style={metaGridStyle}>
+        <div style={metaCardStyle}>
+          <span style={metaIconStyle}>⏱️</span>
+          <div>
+            <div style={metaLabelStyle}>Temps de préparation</div>
+            <div style={metaValueStyle}>{recipe.prepTime || 0} min</div>
+          </div>
         </div>
 
-        {/* Image */}
-        {recipe.image && (
-          <img src={recipe.image} alt={recipe.title} style={imageStyle} />
-        )}
+        <div style={metaCardStyle}>
+          <span style={metaIconStyle}>🍳</span>
+          <div>
+            <div style={metaLabelStyle}>Temps de cuisson</div>
+            <div style={metaValueStyle}>{recipe.cookTime || 0} min</div>
+          </div>
+        </div>
 
-        {/* Auteur */}
-        {recipe.author && (
-          <p style={authorStyle}>
-            Recette proposée par{" "}
-            <strong>
-              {recipe.author.username ||
-                recipe.author.name ||
-                "un chef anonyme"}
-            </strong>
-          </p>
-        )}
+        <div style={metaCardStyle}>
+          <span style={metaIconStyle}>👥</span>
+          <div>
+            <div style={metaLabelStyle}>Portions</div>
+            <div style={metaValueStyle}>{recipe.servings || 1} personne(s)</div>
+          </div>
+        </div>
+      </div>
 
-        <hr style={separatorStyle} />
-
-        {/* Ingrédients */}
-        <div style={sectionStyle}>
-          <h2 style={sectionTitleStyle}>🛒 Ingrédients</h2>
-          <ul style={listStyle}>
-            {ingredientsList.map((item, index) => (
+      <div style={sectionStyle}>
+        <h2 style={sectionTitleStyle}>Ingrédients</h2>
+        <ul style={ingredientsListStyle}>
+          {recipe.ingredients && recipe.ingredients.length > 0 ? (
+            recipe.ingredients.map((ing, index) => (
               <li key={index} style={listItemStyle}>
-                {item}
+                {ing}
               </li>
-            ))}
-          </ul>
-        </div>
+            ))
+          ) : (
+            <li>Aucun ingrédient spécifié.</li>
+          )}
+        </ul>
+      </div>
 
-        <hr style={separatorStyle} />
-
-        {/* Instructions */}
-        <div style={sectionStyle}>
-          <h2 style={sectionTitleStyle}>👨‍🍳 Instructions de préparation</h2>
-          <ol style={orderedListStyle}>
-            {instructionsList.map((step, index) => (
+      <div style={sectionStyle}>
+        <h2 style={sectionTitleStyle}>Instructions</h2>
+        <ol style={orderedListStyle}>
+          {recipe.instructions && recipe.instructions.length > 0 ? (
+            recipe.instructions.map((step, index) => (
               <li key={index} style={stepItemStyle}>
                 {step}
               </li>
-            ))}
-          </ol>
-        </div>
+            ))
+          ) : (
+            <li>Aucune instruction spécifiée.</li>
+          )}
+        </ol>
+      </div>
 
-        <hr style={separatorStyle} />
-      </article>
+      <DeleteModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        recipeId={recipe._id}
+        recipeTitle={recipe.title}
+      />
     </div>
   );
 }
 
-// ==========================================
-// STYLES CSS
-// ==========================================
 const containerStyle = {
-  maxWidth: "850px",
+  maxWidth: "900px",
   margin: "40px auto",
-  padding: "0 20px",
-  fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+  padding: "30px",
+  backgroundColor: "#ffffff",
+  borderRadius: "16px",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+  fontFamily: "system-ui, -apple-system, sans-serif",
 };
 
 const backLinkStyle = {
   display: "inline-block",
   marginBottom: "20px",
-  color: "#0d6efd",
+  color: "#6b7280",
   textDecoration: "none",
-  fontWeight: "600",
-  fontSize: "0.95rem",
-  transition: "transform 0.2s ease",
+  fontWeight: "500",
 };
 
-const cardStyle = {
-  backgroundColor: "#ffffff",
-  padding: "35px",
-  borderRadius: "16px",
-  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
-  border: "1px solid #f0f0f0",
-  textAlign: "left",
+const headerSectionStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  flexWrap: "wrap",
+  gap: "20px",
+  marginBottom: "25px",
+};
+
+const titleGroupStyle = {
+  flex: "1",
+};
+
+const categoryBadgeStyle = {
+  display: "inline-block",
+  padding: "4px 12px",
+  backgroundColor: "#e0e7ff",
+  color: "#4338ca",
+  borderRadius: "20px",
+  fontSize: "0.85rem",
+  fontWeight: "600",
+  marginBottom: "10px",
 };
 
 const titleStyle = {
   fontSize: "2.2rem",
-  color: "#212529",
-  marginBottom: "12px",
-  fontWeight: "700",
-  lineHeight: "1.2",
+  color: "#111827",
+  margin: "0",
+  fontWeight: "800",
 };
 
-const badgeContainerStyle = {
+const actionButtonsStyle = {
   display: "flex",
   gap: "10px",
-  marginBottom: "24px",
-  alignItems: "center",
 };
 
-const categoryBadgeStyle = {
-  backgroundColor: "#e7f1ff",
-  color: "#0c63e4",
-  padding: "6px 14px",
-  borderRadius: "50px",
-  fontSize: "0.85rem",
-  fontWeight: "700",
-  textTransform: "uppercase",
-  letterSpacing: "0.5px",
+const editButtonStyle = {
+  padding: "8px 16px",
+  backgroundColor: "#f3f4f6",
+  color: "#374151",
+  borderRadius: "8px",
+  textDecoration: "none",
+  fontWeight: "600",
 };
 
-const timeBadgeStyle = {
-  backgroundColor: "#fff8e6",
-  color: "#b45309",
-  padding: "6px 14px",
-  borderRadius: "50px",
-  fontSize: "0.85rem",
-  fontWeight: "700",
+const deleteButtonStyle = {
+  padding: "8px 16px",
+  backgroundColor: "#fee2e2",
+  color: "#dc2626",
+  border: "none",
+  borderRadius: "8px",
+  cursor: "pointer",
+  fontWeight: "600",
 };
 
 const imageStyle = {
   width: "100%",
-  maxHeight: "420px",
+  maxHeight: "400px",
   objectFit: "cover",
   borderRadius: "12px",
-  marginBottom: "24px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+  marginBottom: "30px",
 };
 
-const authorStyle = {
-  color: "#6c757d",
-  fontSize: "0.95rem",
-  margin: "0 0 10px 0",
+const metaGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+  gap: "15px",
+  marginBottom: "35px",
+  padding: "20px",
+  backgroundColor: "#f9fafb",
+  borderRadius: "12px",
 };
 
-const separatorStyle = {
-  border: "0",
-  borderTop: "1px solid #eaeaea",
-  margin: "28px 0",
+const metaCardStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+};
+
+const metaIconStyle = {
+  fontSize: "1.5rem",
+};
+
+const metaLabelStyle = {
+  fontSize: "0.85rem",
+  color: "#6b7280",
+};
+
+const metaValueStyle = {
+  fontSize: "1.1rem",
+  fontWeight: "700",
+  color: "#111827",
 };
 
 const sectionStyle = {
-  marginBottom: "10px",
+  marginBottom: "30px",
 };
 
 const sectionTitleStyle = {
-  fontSize: "1.35rem",
-  color: "#1a1a1a",
-  marginBottom: "16px",
-  fontWeight: "600",
+  fontSize: "1.4rem",
+  color: "#111827",
+  borderBottom: "2px solid #f3f4f6",
+  paddingBottom: "8px",
+  marginBottom: "15px",
 };
 
-const listStyle = {
+const ingredientsListStyle = {
   paddingLeft: "20px",
   margin: "0",
   color: "#374151",
@@ -315,34 +336,9 @@ const errorStyle = {
 };
 
 const backButtonStyle = {
-  display: "inline-block",
   padding: "10px 20px",
   backgroundColor: "#0d6efd",
   color: "#fff",
-  borderRadius: "6px",
   textDecoration: "none",
-  fontWeight: "bold",
-};
-
-const deleteTriggerButtonStyle = {
-  backgroundColor: "#dc3545",
-  color: "#fff",
-  border: "none",
-  padding: "8px 16px",
   borderRadius: "6px",
-  cursor: "pointer",
-  fontWeight: "bold",
-  marginBottom: "20px",
-};
-
-const editButtonStyle = {
-  backgroundColor: "#0d6efd",
-  color: "#fff",
-  border: "none",
-  padding: "8px 16px",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontWeight: "bold",
-  marginBottom: "20px",
-  textDecoration: "none",
 };
