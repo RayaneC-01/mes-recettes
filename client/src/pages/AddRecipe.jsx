@@ -1,19 +1,13 @@
-// ==========================================
-// COMPOSANT : AJOUT D'UNE RECETTE
-// ==========================================
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RecipeForm from "../components/RecipeForm";
+import { BASE_URL } from "../services/api";
 
 export default function AddRecipe() {
-  // 1. HOOKS
   const navigate = useNavigate();
-  // 2. ETATS LOCAUX POUR LES MESSAGES DE SUCCES ET D'ERREUR
   const [successMessage, setSuccessMessage] = useState("");
-  // 3. ETATS LOCAUX POUR LES MESSAGES D'ERREUR
   const [errorMessage, setErrorMessage] = useState("");
-  
-  // 4. FONCTION POUR CREER UNE NOUVELLE RECETTE
+
   const handleCreateRecipe = async (formData) => {
     setSuccessMessage("");
     setErrorMessage("");
@@ -21,13 +15,12 @@ export default function AddRecipe() {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
 
-      // On prépare les données en incluant l'ID de l'auteur
       const recipeData = {
         ...formData,
         author: user?._id || user?.id,
       };
 
-      const response = await fetch("http://localhost:5000/api/recipes", {
+      const response = await fetch(`${BASE_URL}/recipes`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,12 +31,12 @@ export default function AddRecipe() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccessMessage("🎉 Recette ajoutée avec succès ! Redirection...");
+        setSuccessMessage("Recette ajoutée avec succès !");
         setTimeout(() => {
-          navigate("/");
-        }, 2000);
+          navigate(`/recette/${data._id || data.id}`);
+        }, 1500);
       } else {
-        setErrorMessage(data.message || "Erreur lors de l'ajout de la recette");
+        setErrorMessage(data.message || "Erreur lors de la création");
       }
     } catch (error) {
       console.error("Erreur :", error);
@@ -57,10 +50,7 @@ export default function AddRecipe() {
         Ajouter une recette
       </h1>
 
-      {/* Message de succès stylisé */}
       {successMessage && <div style={successStyle}>{successMessage}</div>}
-
-      {/* Message d'erreur stylisé */}
       {errorMessage && <div style={errorStyle}>{errorMessage}</div>}
 
       <RecipeForm onSubmit={handleCreateRecipe} />
@@ -68,9 +58,6 @@ export default function AddRecipe() {
   );
 }
 
-// ==========================================
-// STYLES DU CONTENEUR (Identiques à EditRecipe)
-// ==========================================
 const containerStyle = {
   width: "100%",
   maxWidth: "800px",
@@ -83,7 +70,6 @@ const containerStyle = {
   boxSizing: "border-box",
 };
 
-// Styles pour les notifications
 const successStyle = {
   backgroundColor: "#d4edda",
   color: "#155724",
@@ -91,8 +77,6 @@ const successStyle = {
   borderRadius: "8px",
   marginBottom: "20px",
   textAlign: "center",
-  border: "1px solid #c3e6cb",
-  fontWeight: "bold",
 };
 
 const errorStyle = {
@@ -102,6 +86,4 @@ const errorStyle = {
   borderRadius: "8px",
   marginBottom: "20px",
   textAlign: "center",
-  border: "1px solid #f5c6cb",
-  fontWeight: "bold",
 };
