@@ -1,6 +1,6 @@
-//Centraliser les fetch() Communiquer avec le backend, (Authentification et Recettes)
+// Centraliser les fetch() pour communiquer avec le backend (Authentification et Recettes)
 
-const BASE_URL = "http://localhost:5000/api";
+export const BASE_URL = "https://mes-recettes-39rv.onrender.com/api";
 
 // ==========================================
 // 1. SERVICES D'AUTHENTIFICATION
@@ -8,10 +8,8 @@ const BASE_URL = "http://localhost:5000/api";
 
 // Inscription d'un utilisateur
 export const registerUser = async (userData) => {
-    // Envoyer une requête POST à l'API pour créer un nouvel utilisateur
     const response = await fetch(`${BASE_URL}/auth/register`, {
         method: "POST",
-        // Spécifier que le corps de la requête est au format JSON
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
     });
@@ -31,6 +29,7 @@ export const loginUser = async (credentials) => {
 // ==========================================
 // 2. SERVICES DE GESTION DES RECETTES
 // ==========================================
+
 // Récupérer toutes les recettes
 export const getAllRecipes = async () => {
     const response = await fetch(`${BASE_URL}/recipes`);
