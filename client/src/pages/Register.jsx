@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { registerUser } from "../services/api";
 
 function Register() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ function Register() {
     password: "",
     confirmPassword: "",
   });
+
   // État pour gérer les erreurs, le chargement et l'affichage des mots de passe
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,6 +32,7 @@ function Register() {
       [e.target.name]: e.target.value,
     });
   };
+
   // Fonction pour gérer la soumission du formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,17 +44,18 @@ function Register() {
       !formData.lastName ||
       !formData.username ||
       !formData.email ||
-      !formData.password ||
-      !formData.phone
+      !formData.password
     ) {
-      setError("Tous les champs sont obligatoires.");
+      setError("Tous les champs obligatoires doivent être remplis.");
       return;
     }
-    // Validation du mot de passe
+
+    // Validation de la longueur du mot de passe
     if (formData.password.length < 6 || formData.password.length > 20) {
       setError("Le mot de passe doit contenir entre 6 et 20 caractères.");
       return;
     }
+
     // Validation de la correspondance des mots de passe
     if (formData.password !== formData.confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
@@ -59,34 +63,25 @@ function Register() {
     }
 
     try {
-      // Indiquer que le processus est en cours
       setLoading(true);
 
-      // ÉTAPE 1 : Requête d'inscription
-      const response = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          username: formData.username,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password,
-        }),
+      // ÉTAPE 1 : Requête d'inscription via le service d'API (Render)
+      const response = await registerUser({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        username: formData.username,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
+      if (response.message && !response._id && !response.id) {
         throw new Error(
-          data.message || "Une erreur est survenue lors de l'inscription.",
+          response.message || "Une erreur est survenue lors de l'inscription."
         );
       }
 
-      // ÉTAPE 2 : Connexion automatique via le Contexte (Format email / mdp)
+      // ÉTAPE 2 : Connexion automatique via le Contexte
       const success = await login({
         email: formData.email,
         password: formData.password,
@@ -94,14 +89,14 @@ function Register() {
 
       if (!success) {
         throw new Error(
-          "Compte créé, mais la connexion automatique a échoué. Veuillez vous connecter manuellement.",
+          "Compte créé, mais la connexion automatique a échoué. Veuillez vous connecter manuellement."
         );
       }
 
       // ÉTAPE 3 : Redirection vers la page d'accueil
       navigate("/");
 
-      // ÉTAPE 4 : Remise à zéro des champs du formulaire
+      // ÉTAPE 4 : Remise à zéro du formulaire
       setFormData({
         firstName: "",
         lastName: "",
@@ -112,7 +107,7 @@ function Register() {
         confirmPassword: "",
       });
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Erreur lors de la création du compte.");
     } finally {
       setLoading(false);
     }
@@ -121,7 +116,7 @@ function Register() {
   return (
     <div style={containerStyle}>
       <form onSubmit={handleSubmit} style={formStyle}>
-        <h2 style={titleStyle}>Créer un compte </h2>
+        <h2 style={titleStyle}>Créer un compte 👨‍🍳</h2>
 
         {error && <div style={errorAlertStyle}>{error}</div>}
 
@@ -137,6 +132,7 @@ function Register() {
               placeholder="Jean"
             />
           </div>
+
           <div style={inputGroupStyle}>
             <label style={labelStyle}>Nom</label>
             <input
@@ -175,7 +171,7 @@ function Register() {
         </div>
 
         <div style={inputGroupStyle}>
-          <label style={labelStyle}>Téléphone</label>
+          <label style={labelStyle}>Téléphone (optionnel)</label>
           <input
             type="tel"
             name="phone"
@@ -228,6 +224,15 @@ function Register() {
           </div>
         </div>
 
+        <div style={NewAccountStyle}>
+          <p>
+            Déjà un compte ?{" "}
+            <Link to="/login" style={linkStyle}>
+              Connectez-vous ici
+            </Link>
+          </p>
+        </div>
+
         <button type="submit" disabled={loading} style={btnPrimaryStyle}>
           {loading ? "Inscription en cours..." : "S'inscrire"}
         </button>
@@ -265,7 +270,10 @@ const titleStyle = {
   fontWeight: "700",
 };
 
-const rowStyle = { display: "flex", gap: "15px", marginBottom: "15px" };
+const rowStyle = {
+  display: "flex",
+  gap: "15px",
+};
 
 const inputGroupStyle = {
   display: "flex",
@@ -283,14 +291,15 @@ const inputStyle = {
   borderRadius: "6px",
   fontSize: "1rem",
   color: "#212529",
-  width: "85%",
+  width: "100%",
+  boxSizing: "border-box",
 };
 
 const inputContainerStyle = {
   position: "relative",
   display: "flex",
   alignItems: "center",
-  width: "85%",
+  width: "100%",
 };
 
 const inputWithBtnStyle = {
@@ -342,6 +351,18 @@ const eyeButtonStyle = {
   letterSpacing: "0.5px",
   padding: "4px 8px",
   borderRadius: "4px",
+};
+
+const NewAccountStyle = {
+  textAlign: "center",
+  marginBottom: "15px",
+  fontSize: "1rem",
+};
+
+const linkStyle = {
+  color: "#0d6efd",
+  textDecoration: "none",
+  fontWeight: "600",
 };
 
 export default Register;
