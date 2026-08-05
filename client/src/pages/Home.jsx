@@ -4,6 +4,7 @@ import SearchBar from "../components/SearchBar";
 import CategoryFilter from "../components/CategoryFilter";
 import RecipeCard from "../components/RecipeCard";
 import BtnTop from "../components/btnTop";
+import Loader from "../components/Loader";
 import { BASE_URL } from "../services/api";
 
 export default function Home() {
@@ -51,7 +52,8 @@ export default function Home() {
       <div style={contentWrapperStyle}>
         <h1 style={titleStyle}>Découvrez nos recettes</h1>
         <p style={subtitleStyle}>
-          Trouvez l'inspiration pour vos prochains repas parmi toutes nos créations gourmandes.
+          Trouvez l'inspiration pour vos prochains repas parmi toutes nos
+          créations gourmandes.
         </p>
 
         {/* Barre de recherche */}
@@ -65,7 +67,10 @@ export default function Home() {
 
         {/* Gestion des états : Chargement vs Liste des recettes */}
         {loading ? (
-          <div style={loadingStyle}>Chargement des délicieuses recettes...</div>
+          <div style={loadingStyle}>
+            Chargement des délicieuses recettes...
+            <Loader />
+          </div>
         ) : (
           <div style={gridStyle}>
             {filteredRecipes.length === 0 ? (
