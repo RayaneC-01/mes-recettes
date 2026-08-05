@@ -92,12 +92,7 @@ export default function RecipeDetail() {
             <Link to={`/modifier-recette/${recipe._id}`} style={editButtonStyle}>
               Modifier
             </Link>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              style={deleteButtonStyle}
-            >
-              Supprimer
-            </button>
+            <button onClick={() => setIsModalOpen(true)}>Supprimer</button>
           </div>
         )}
       </div>
@@ -177,13 +172,11 @@ export default function RecipeDetail() {
 }
 
 const containerStyle = {
-  maxWidth: "900px",
-  margin: "40px auto",
-  padding: "30px",
-  backgroundColor: "#ffffff",
-  borderRadius: "16px",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-  fontFamily: "system-ui, -apple-system, sans-serif",
+  width: "100%",
+  maxWidth: "900px", // Permet d'occuper une belle largeur sur grand écran
+  margin: "0 auto",   // Centre la carte sur l'écran
+  padding: "20px",
+  boxSizing: "border-box",
 };
 
 const backLinkStyle = {
