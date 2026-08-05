@@ -34,6 +34,16 @@ export default function RecipeDetail() {
     fetchRecipe();
   }, [id]);
 
+  // --- FONCTIONS DE SÉCURISATION DES DONNÉES ---
+  const formatArrayData = (data) => {
+    if (Array.isArray(data)) return data;
+    if (typeof data === "string" && data.trim() !== "") {
+      // Découpe par saut de ligne ou par virgule
+      return data.split(/[\n,]+/).map((item) => item.trim()).filter(Boolean);
+    }
+    return [];
+  };
+
   const isAuthor =
     currentUser &&
     recipe &&
@@ -59,6 +69,9 @@ export default function RecipeDetail() {
       </div>
     );
   }
+
+  const ingredientsList = formatArrayData(recipe.ingredients);
+  const instructionsList = formatArrayData(recipe.instructions);
 
   return (
     <div style={containerStyle}>
@@ -126,8 +139,8 @@ export default function RecipeDetail() {
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}>Ingrédients</h2>
         <ul style={ingredientsListStyle}>
-          {recipe.ingredients && recipe.ingredients.length > 0 ? (
-            recipe.ingredients.map((ing, index) => (
+          {ingredientsList.length > 0 ? (
+            ingredientsList.map((ing, index) => (
               <li key={index} style={listItemStyle}>
                 {ing}
               </li>
@@ -141,8 +154,8 @@ export default function RecipeDetail() {
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}>Instructions</h2>
         <ol style={orderedListStyle}>
-          {recipe.instructions && recipe.instructions.length > 0 ? (
-            recipe.instructions.map((step, index) => (
+          {instructionsList.length > 0 ? (
+            instructionsList.map((step, index) => (
               <li key={index} style={stepItemStyle}>
                 {step}
               </li>
