@@ -16,11 +16,10 @@ import EditRecipe from "./pages/EditRecipe";
 // Le Router est utilisé pour gérer la navigation entre les différentes pages de l'application, puis les Routes définissent les chemins et les composants correspondants.
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <Navbar />
         <Routes>
-          {/* Route de chaque fichier */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -29,8 +28,8 @@ function App() {
           <Route path="/recette/:id" element={<RecipeDetail />} />
           <Route path="/modifier/:id" element={<EditRecipe />} />
         </Routes>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
