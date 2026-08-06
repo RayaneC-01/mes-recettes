@@ -88,7 +88,7 @@ export default function RecipeForm({ initialData, onSubmit }) {
         </div>
         {/* Temps de préparation */}
         <div style={{ ...groupStyle, flex: 1 }}>
-          <label style={labelStyle}>Temps (min) *</label>
+          <label style={labelStyle}>Temps de préparation (min) *</label>
           <input
             type="number"
             name="prepTime"

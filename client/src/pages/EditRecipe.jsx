@@ -26,12 +26,12 @@ export default function EditRecipe() {
         const data = await response.json();
 
         if (response.ok) {
-          const isOwner = Boolean(
-            currentUserId && authorId && currentUserId === authorId,
-          );
-          const isAdmin = user?.role === "admin";
+          // Récupération sécurisée des ID
+          const authorId = data.author?._id || data.author;
+          const currentUserId = user?._id || user?.id;
 
-          if (!isOwner && !isAdmin) {
+          // Vérification des droits (Auteur ou Admin)
+          if (authorId && currentUserId && authorId !== currentUserId && user?.role !== "admin") {
             alert("Vous n'êtes pas autorisé à modifier cette recette.");
             navigate(`/recette/${id}`);
             return;
@@ -43,7 +43,7 @@ export default function EditRecipe() {
         }
       } catch (err) {
         console.error("Erreur de chargement :", err);
-        setError("Erreur réseau lors de la récupération de la recette");
+        setError("Erreur de connexion au serveur");
       } finally {
         setLoading(false);
       }
@@ -92,7 +92,6 @@ export default function EditRecipe() {
       <h1 style={{ marginBottom: "20px" }}>Modifier la recette</h1>
 
       <RecipeForm
-        style={formStyle}
         initialData={initialData}
         onSubmit={handleSubmit}
       />
@@ -100,6 +99,7 @@ export default function EditRecipe() {
   );
 }
 
+// Styles
 const containerStyle = {
   width: "100%",
   maxWidth: "800px",
@@ -108,22 +108,19 @@ const containerStyle = {
   backgroundColor: "#ffffff",
   borderRadius: "12px",
   boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
-  border: "1px solid #eaeaea",
   boxSizing: "border-box",
 };
 
 const backLinkStyle = {
   display: "inline-block",
   marginBottom: "15px",
-  color: "#6c757d",
+  color: "#0d6efd",
   textDecoration: "none",
-  fontSize: "0.95rem",
+  fontWeight: "500",
 };
 
 const statusStyle = {
   textAlign: "center",
-  marginTop: "50px",
+  padding: "50px 20px",
   fontSize: "1.2rem",
 };
-
-const formStyle = {};
