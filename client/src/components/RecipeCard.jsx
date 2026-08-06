@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function RecipeCard({ recipe }) {
-  const navigate = useNavigate();
-  // 1. État pour suivre le survol de la carte
   const [isHovered, setIsHovered] = useState(false);
 
-  // 2. Styles dynamiques combinés avec le hover
   const combinedCardStyle = {
     ...cardStyle,
     transform: isHovered ? "translateY(-6px)" : "translateY(0)",
@@ -20,38 +17,35 @@ export default function RecipeCard({ recipe }) {
     transform: isHovered ? "scale(1.03)" : "scale(1)",
   };
 
-  // 3. Rendu de la carte de recette
+  const recipeImage = recipe.image || recipe.imageUrl;
+
   return (
     <div
       style={combinedCardStyle}
-      // 4. Navigation vers la page de détails de la recette au clic
-      onClick={() => navigate(`/recette/${recipe._id}`)}
-      // 3. Déclencheurs de l'animation au survol
       onMouseEnter={() => setIsHovered(true)}
-      // 4. Réinitialisation de l'animation lorsque la souris quitte la carte
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Image de chaque recette */}
-      {recipe.image || recipe.imageUrl ? (
+      {/* Image de la recette */}
+      {recipeImage ? (
         <img
-          src={recipe.image || recipe.imageUrl}
+          src={recipeImage}
           alt={recipe.title}
           style={combinedImageStyle}
         />
       ) : (
         <div style={noImageStyle}>
-          <span>Aucune image disponible</span>
+          <span>📷 Aucune image</span>
         </div>
       )}
 
+      {/* Contenu de la carte */}
       <div style={{ padding: "15px" }}>
         <h3 style={titleStyle}>{recipe.title}</h3>
+
         <span style={badgeStyle}>{recipe.category}</span>
 
-        {/* Temps de préparation (si présent) */}
         {recipe.prepTime && <p style={timeStyle}>⏱️ {recipe.prepTime} mins</p>}
 
-        {/* Bouton Voir la recette en détail */}
         <Link to={`/recette/${recipe._id}`} style={buttonStyle}>
           Voir la recette
         </Link>
@@ -60,25 +54,35 @@ export default function RecipeCard({ recipe }) {
   );
 }
 
-// Styles spécifiques à RecipeCard
+// Styles
 const cardStyle = {
   backgroundColor: "#ffffff",
   borderRadius: "8px",
-  border: "1px solid #dee2e6", // Réduit un peu la bordure de 5px à 1px pour un rendu plus moderne !
+  border: "1px solid #dee2e6",
   textAlign: "left",
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
-  cursor: "pointer",
   overflow: "hidden",
-  transition: "all 0.3s ease", // Animation fluide
+  transition: "all 0.3s ease",
 };
 
 const imageStyle = {
   width: "100%",
   height: "150px",
   objectFit: "cover",
-  transition: "transform 0.3s ease", // Animation fluide pour le zoom image
+  transition: "transform 0.3s ease",
+};
+
+const noImageStyle = {
+  width: "100%",
+  height: "150px",
+  backgroundColor: "#e9ecef",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#6c757d",
+  fontSize: "0.9rem",
 };
 
 const titleStyle = {
@@ -88,26 +92,31 @@ const titleStyle = {
 };
 
 const badgeStyle = {
-  fontSize: "0.75rem",
-  fontWeight: "bold",
-  color: "#0d6efd",
-  textTransform: "uppercase",
+  display: "inline-block",
+  padding: "4px 8px",
+  backgroundColor: "#e9ecef",
+  color: "#495057",
+  borderRadius: "4px",
+  fontSize: "0.85rem",
+  marginBottom: "10px",
 };
 
 const timeStyle = {
-  fontSize: "0.85rem",
-  color: "#495057",
-  fontWeight: "500",
-  margin: 0,
+  fontSize: "0.9rem",
+  color: "#6c757d",
+  margin: "5px 0 15px 0",
 };
 
 const buttonStyle = {
   display: "inline-block",
-  marginTop: "10px",
-  padding: "7px 8px",
+  padding: "8px 12px",
   backgroundColor: "#0d6efd",
-  color: "#fff",
-  borderRadius: "4px",
+  color: "#ffffff",
   textDecoration: "none",
-  fontWeight: "bold",
+  borderRadius: "5px",
+  fontSize: "0.9rem",
+  fontWeight: "500",
+  textAlign: "center",
+  width: "100%",
+  boxSizing: "border-box",
 };
