@@ -99,12 +99,9 @@ export default function RecipeDetail() {
         {/* 2. On affiche les boutons SEULEMENT si canEditOrDelete est true */}
         {canEditOrDelete && (
           <div style={actionButtonsStyle}>
-            <Link
-              to={`/modifier-recette/${recipe._id}`}
-              style={editButtonStyle}
-            >
+            <Link to={`/modifier/${recipe._id}`} style={editButtonStyle}>
               Modifier
-            </Link>
+            </Link> 
             <button
               onClick={() => setIsModalOpen(true)}
               style={deleteButtonStyle}
