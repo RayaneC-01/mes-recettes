@@ -32,19 +32,15 @@ export default function RecipeCard({ recipe }) {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image de chaque recette */}
-      {recipe.image ? (
-        <img src={recipe.image} alt={recipe.title} style={combinedImageStyle} />
+      {recipe.image || recipe.imageUrl ? (
+        <img
+          src={recipe.image || recipe.imageUrl}
+          alt={recipe.title}
+          style={combinedImageStyle}
+        />
       ) : (
-        <div
-          style={{
-            ...imageStyle,
-            backgroundColor: "#f8f9fa",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <span style={{ color: "#6c757d" }}>Aucune image disponible</span>
+        <div style={noImageStyle}>
+          <span>Aucune image disponible</span>
         </div>
       )}
 
