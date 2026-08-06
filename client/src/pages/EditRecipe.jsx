@@ -26,10 +26,12 @@ export default function EditRecipe() {
         const data = await response.json();
 
         if (response.ok) {
-          const authorId = data.author?._id || data.author;
-          const currentUserId = user?._id || user?.id;
+          const isOwner = Boolean(
+            currentUserId && authorId && currentUserId === authorId,
+          );
+          const isAdmin = user?.role === "admin";
 
-          if (authorId !== currentUserId) {
+          if (!isOwner && !isAdmin) {
             alert("Vous n'êtes pas autorisé à modifier cette recette.");
             navigate(`/recette/${id}`);
             return;
