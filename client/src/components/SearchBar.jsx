@@ -5,7 +5,7 @@ export default function SearchBar({ value, onChange }) {
       type="text"
       placeholder="Rechercher une recette..."
       value={value}
-      onChange={onChange} 
+      onChange={(e) => onChange(e.target.value)} // Appel de la fonction onChange avec la nouvelle valeur
       style={searchBarStyle}
     />
   );
