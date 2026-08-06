@@ -39,17 +39,28 @@ export default function RecipeDetail() {
     if (Array.isArray(data)) return data;
     if (typeof data === "string" && data.trim() !== "") {
       // Découpe par saut de ligne ou par virgule
-      return data.split(/[\n,]+/).map((item) => item.trim()).filter(Boolean);
+      return data
+        .split(/[\n,]+/)
+        .map((item) => item.trim())
+        .filter(Boolean);
     }
     return [];
   };
 
-  const isAuthor =
-    currentUser &&
-    recipe &&
-    (currentUser._id === recipe.author?._id ||
-      currentUser._id === recipe.author ||
-      currentUser.id === recipe.author);
+  // Vérification stricte des identifiants
+  const currentUserId = currentUser?._id || currentUser?.id;
+  const recipeAuthorId = recipe?.author?._id || recipe?.author;
+
+  // Est auteur SI les deux IDs existent ET qu'ils sont égaux
+  const isOwner = Boolean(
+    currentUserId && recipeAuthorId && currentUserId === recipeAuthorId,
+  );
+
+  // Est admin si l'utilisateur a le rôle admin
+  const isAdmin = currentUser?.role === "admin";
+
+  // Autoriser la modification/suppression uniquement si proprio ou admin
+  const canEditOrDelete = isOwner || isAdmin;
 
   if (loading) {
     return (
@@ -81,28 +92,37 @@ export default function RecipeDetail() {
 
       <div style={headerSectionStyle}>
         <div style={titleGroupStyle}>
-          <span style={categoryBadgeStyle}>
-            {recipe.category || "Général"}
-          </span>
+          <span style={categoryBadgeStyle}>{recipe.category || "Général"}</span>
           <h1 style={titleStyle}>{recipe.title}</h1>
         </div>
 
-        {isAuthor && (
+        {/* 2. On affiche les boutons SEULEMENT si canEditOrDelete est true */}
+        {canEditOrDelete && (
           <div style={actionButtonsStyle}>
-            <Link to={`/modifier-recette/${recipe._id}`} style={editButtonStyle}>
+            <Link
+              to={`/modifier-recette/${recipe._id}`}
+              style={editButtonStyle}
+            >
               Modifier
             </Link>
-            <button onClick={() => setIsModalOpen(true)}>Supprimer</button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              style={deleteButtonStyle}
+            >
+              Supprimer
+            </button>
           </div>
         )}
+
+        {/* 3. On passe isOpen et onClose à la modale */}
+        <DeleteModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
       </div>
 
       {recipe.imageUrl && (
-        <img
-          src={recipe.imageUrl}
-          alt={recipe.title}
-          style={imageStyle}
-        />
+        <img src={recipe.imageUrl} alt={recipe.title} style={imageStyle} />
       )}
 
       <div style={metaGridStyle}>
@@ -162,7 +182,7 @@ export default function RecipeDetail() {
       </div>
 
       <DeleteModal
-        isOpen={isModalOpen}
+        isOpen={isModalOpen} // ✅ Passer la variable, ne pas l'appeler !
         onClose={() => setIsModalOpen(false)}
         recipeId={recipe._id}
         recipeTitle={recipe.title}
@@ -174,7 +194,7 @@ export default function RecipeDetail() {
 const containerStyle = {
   width: "100%",
   maxWidth: "900px", // Permet d'occuper une belle largeur sur grand écran
-  margin: "0 auto",   // Centre la carte sur l'écran
+  margin: "0 auto", // Centre la carte sur l'écran
   padding: "20px",
   boxSizing: "border-box",
 };
