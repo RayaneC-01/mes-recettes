@@ -15,18 +15,25 @@ export default function RecipeForm({ initialData, onSubmit }) {
 
   // Si on est en mode modification, on pré-remplit les champs
   useEffect(() => {
-    if (initialData) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFormData({
-        title: initialData.title || "",
-        category: initialData.category || "Entrée",
-        prepTime: initialData.prepTime || "",
-        ingredients: initialData.ingredients || "",
-        instructions: initialData.instructions || "",
-        image: initialData.image || "",
-      });
-    }
-  }, [initialData]);
+    // Vérifie si initialData est défini avant de l'utiliser
+  if (initialData) {
+    // Pré-remplissage des champs du formulaire avec les données existantes
+    setFormData({
+      title: initialData.title || "",
+      category: initialData.category || "Entrée",
+      prepTime: initialData.prepTime || "",
+      // Si c'est un tableau, on le rejoint avec un saut de ligne "\n"
+      ingredients: Array.isArray(initialData.ingredients)
+        ? initialData.ingredients.join("\n")
+        : initialData.ingredients || "",
+      instructions: Array.isArray(initialData.instructions)
+        ? initialData.instructions.join("\n")
+        : initialData.instructions || "",
+      image: initialData.image || initialData.imageUrl || "",
+    });
+  }
+  // Le tableau de dépendances inclut initialData pour que l'effet se déclenche à chaque fois que initialData change
+}, [initialData]);
 
   // Met à jour l'état quand l'utilisateur tape dans un champ
   const handleChange = (e) => {
