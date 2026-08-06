@@ -2,7 +2,6 @@ export default function Loader() {
   return (
     <div style={containerStyle}>
       <div style={spinnerStyle}></div>
-      <p style={textStyle}>Chargement des délicieuses recettes...</p>
       
       {/* Animation CSS injectée directement */}
       <style>{`
@@ -34,9 +33,3 @@ const spinnerStyle = {
   animation: "spin 1s linear infinite",
 };
 
-const textStyle = {
-  marginTop: "16px",
-  fontSize: "1.1rem",
-  color: "#495057",
-  fontWeight: "500",
-};
