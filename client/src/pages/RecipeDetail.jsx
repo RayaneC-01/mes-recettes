@@ -101,7 +101,7 @@ export default function RecipeDetail() {
           <div style={actionButtonsStyle}>
             <Link to={`/modifier/${recipe._id}`} style={editButtonStyle}>
               Modifier
-            </Link> 
+            </Link>
             <button
               onClick={() => setIsModalOpen(true)}
               style={deleteButtonStyle}
@@ -149,33 +149,39 @@ export default function RecipeDetail() {
       </div>
 
       <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Ingrédients</h2>
-        <ul style={ingredientsListStyle}>
-          {ingredientsList.length > 0 ? (
-            ingredientsList.map((ing, index) => (
-              <li key={index} style={listItemStyle}>
-                {ing}
-              </li>
-            ))
+        {/* Ingrédients */}
+        <div style={{ marginBottom: "25px" }}>
+          <h3>Ingrédients</h3>
+          {Array.isArray(recipe.ingredients) ? (
+            <ul style={{ paddingLeft: "20px", lineHeight: "1.8" }}>
+              {recipe.ingredients.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
           ) : (
-            <li>Aucun ingrédient spécifié.</li>
+            // Sécurité au cas où c'est une ancienne recette stockée en texte simple (String)
+            <p style={{ whitespace: "pre-line" }}>{recipe.ingredients}</p>
           )}
-        </ul>
+        </div>
       </div>
 
       <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Instructions</h2>
-        <ol style={orderedListStyle}>
-          {instructionsList.length > 0 ? (
-            instructionsList.map((step, index) => (
-              <li key={index} style={stepItemStyle}>
-                {step}
-              </li>
-            ))
+        {/* Instructions / Étapes */}
+        <div style={{ marginBottom: "25px" }}>
+          <h3>Instructions</h3>
+          {Array.isArray(recipe.instructions) ? (
+            <ol style={{ paddingLeft: "20px", lineHeight: "1.8" }}>
+              {recipe.instructions.map((step, index) => (
+                <li key={index} style={{ marginBottom: "10px" }}>
+                  {step}
+                </li>
+              ))}
+            </ol>
           ) : (
-            <li>Aucune instruction spécifiée.</li>
+            // Sécurité au cas où c'est du texte simple
+            <p style={{ whitespace: "pre-line" }}>{recipe.instructions}</p>
           )}
-        </ol>
+        </div>
       </div>
 
       <DeleteModal
