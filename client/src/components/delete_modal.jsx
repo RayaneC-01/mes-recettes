@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { BASE_URL } from "../services/api"; // Importation de l'URL Render
 
 export default function DeleteModal({ isOpen, onClose }) {
