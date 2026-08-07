@@ -36,14 +36,10 @@ export default function RecipeDetail() {
 
   // --- FONCTIONS DE SÉCURISATION DES DONNÉES ---
   const formatArrayData = (data) => {
+    // Si c'est déjà un tableau, on le retourne tel quel
     if (Array.isArray(data)) return data;
-    if (typeof data === "string" && data.trim() !== "") {
-      // Découpe par saut de ligne ou par virgule
-      return data
-        .split(/[\n,]+/)
-        .map((item) => item.trim())
-        .filter(Boolean);
-    }
+    // Si c'est une chaîne de caractères, on la découpe en tableau
+    if (typeof data === "string") return data.split("\n").filter(Boolean);
     return [];
   };
 
@@ -150,21 +146,13 @@ export default function RecipeDetail() {
 
       {/* Ingrédients */}
       <div style={sectionStyle}>
-        <h3>🥗 Ingrédients</h3>
+        <h3>Ingrédients</h3>
         {ingredientsList.length > 0 ? (
-          <div
-            style={{
-              whiteSpace: "pre-line",
-              lineHeight: "1.8",
-              paddingLeft: "10px",
-            }}
-          >
-            {Array.isArray(recipe.ingredients)
-              ? recipe.ingredients.map((item, index) => (
-                  <div key={index}>• {item}</div>
-                ))
-              : recipe.ingredients}
-          </div>
+          <ul style={{ paddingLeft: "20px", lineHeight: "1.8" }}>
+            {ingredientsList.map((item, index) => (
+              <li key={index}>{item.replace(/^•\s*/, "")}</li>
+            ))}
+          </ul>
         ) : (
           <p>Aucun ingrédient renseigné.</p>
         )}
@@ -174,21 +162,13 @@ export default function RecipeDetail() {
       <div style={sectionStyle}>
         <h3>👨‍🍳 Instructions</h3>
         {instructionsList.length > 0 ? (
-          <div
-            style={{
-              whiteSpace: "pre-line",
-              lineHeight: "1.8",
-              paddingLeft: "10px",
-            }}
-          >
-            {Array.isArray(recipe.instructions)
-              ? recipe.instructions.map((step, index) => (
-                  <div key={index} style={{ marginBottom: "8px" }}>
-                    <strong>{index + 1}.</strong> {step}
-                  </div>
-                ))
-              : recipe.instructions}
-          </div>
+          <ol style={{ paddingLeft: "20px", lineHeight: "1.8" }}>
+            {instructionsList.map((step, index) => (
+              <li key={index} style={{ marginBottom: "10px" }}>
+                {step.replace(/^\d+\.\s*/, "")}
+              </li>
+            ))}
+          </ol>
         ) : (
           <p>Aucune instruction renseignée.</p>
         )}
