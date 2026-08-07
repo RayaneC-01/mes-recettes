@@ -36,22 +36,34 @@ export default function RecipeDetail() {
 
   // --- FONCTIONS DE SÉCURISATION DES DONNÉES ---
   const formatArrayData = (data) => {
-    // Si c'est déjà un tableau, on le retourne tel quel
-    if (Array.isArray(data)) return data;
-    // Si c'est une chaîne de caractères, on la découpe en tableau
-    if (typeof data === "string" && data.trim() !== "") {
-      // Découpe par saut de ligne OU par virgule
-      return (
-        data
-          // Découpe par saut de ligne OU par virgule
-          .split(/[\n,]+/)
-          // Trim chaque élément et retire les éventuelles virgules en fin de mot
-          .map((item) => item.trim().replace(/,$/, "")) // Retire les virgules en fin de mot
-          .filter(Boolean)
-      );
+    if (!data) return [];
+
+    // 1. Si c'est un tableau, on le transforme en texte
+    let str = Array.isArray(data) ? data.join("\n") : String(data);
+
+    // 2. Si le texte contient des sauts de ligne ou des virgules, on découpe normalement
+    if (str.includes("\n") || str.includes(",")) {
+      return str
+        .split(/[\n,]+/)
+        .map((item) =>
+          item
+            .trim()
+            .replace(/^•\s*/, "")
+            .replace(/^\d+\.\s*/, "")
+            .replace(/,$/, ""),
+        )
+        .filter(Boolean);
     }
-    // Si c'est vide ou autre chose, on retourne un tableau vide
-    return [];
+
+    // 3. S'il n'y a AUCUN saut de ligne ni virgule (ton cas actuel) :
+    // On insère un saut de ligne juste avant chaque nombre (ex: "2", "1/2", "4")
+    str = str.replace(/(?<!^)(?=\b\d+(\/\d+)?\b)/g, "\n");
+
+    // 4. On découpe par ligne
+    return str
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean);
   };
 
   // Vérification stricte des identifiants
