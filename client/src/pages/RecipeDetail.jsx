@@ -53,7 +53,7 @@ export default function RecipeDetail() {
 
   // Est auteur SI les deux IDs existent ET qu'ils sont égaux
   const isOwner = Boolean(
-    currentUserId && recipeAuthorId && currentUserId === recipeAuthorId
+    currentUserId && recipeAuthorId && currentUserId === recipeAuthorId,
   );
 
   // Est admin si l'utilisateur a le rôle admin
@@ -152,13 +152,19 @@ export default function RecipeDetail() {
       <div style={sectionStyle}>
         <h3>🥗 Ingrédients</h3>
         {ingredientsList.length > 0 ? (
-          <ul style={listStyle}>
-            {ingredientsList.map((item, index) => (
-              <li key={index} style={{ marginBottom: "8px" }}>
-                {item}
-              </li>
-            ))}
-          </ul>
+          <div
+            style={{
+              whiteSpace: "pre-line",
+              lineHeight: "1.8",
+              paddingLeft: "10px",
+            }}
+          >
+            {Array.isArray(recipe.ingredients)
+              ? recipe.ingredients.map((item, index) => (
+                  <div key={index}>• {item}</div>
+                ))
+              : recipe.ingredients}
+          </div>
         ) : (
           <p>Aucun ingrédient renseigné.</p>
         )}
@@ -168,13 +174,21 @@ export default function RecipeDetail() {
       <div style={sectionStyle}>
         <h3>👨‍🍳 Instructions</h3>
         {instructionsList.length > 0 ? (
-          <ol style={listStyle}>
-            {instructionsList.map((step, index) => (
-              <li key={index} style={{ marginBottom: "12px" }}>
-                {step}
-              </li>
-            ))}
-          </ol>
+          <div
+            style={{
+              whiteSpace: "pre-line",
+              lineHeight: "1.8",
+              paddingLeft: "10px",
+            }}
+          >
+            {Array.isArray(recipe.instructions)
+              ? recipe.instructions.map((step, index) => (
+                  <div key={index} style={{ marginBottom: "8px" }}>
+                    <strong>{index + 1}.</strong> {step}
+                  </div>
+                ))
+              : recipe.instructions}
+          </div>
         ) : (
           <p>Aucune instruction renseignée.</p>
         )}
