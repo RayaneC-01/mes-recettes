@@ -144,6 +144,7 @@ export default function RecipeDetail() {
         </div>
       </div>
 
+
       {/* Ingrédients */}
       <div style={sectionStyle}>
         <h3>Ingrédients</h3>
