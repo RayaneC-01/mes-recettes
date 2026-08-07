@@ -53,7 +53,7 @@ export default function RecipeDetail() {
 
   // Est auteur SI les deux IDs existent ET qu'ils sont égaux
   const isOwner = Boolean(
-    currentUserId && recipeAuthorId && currentUserId === recipeAuthorId,
+    currentUserId && recipeAuthorId && currentUserId === recipeAuthorId
   );
 
   // Est admin si l'utilisateur a le rôle admin
@@ -81,6 +81,10 @@ export default function RecipeDetail() {
     );
   }
 
+  // 💡 Support de recipe.image OU recipe.imageUrl
+  const recipeImage = recipe.image || recipe.imageUrl;
+
+  // 💡 Conversion dynamique en tableaux
   const ingredientsList = formatArrayData(recipe.ingredients);
   const instructionsList = formatArrayData(recipe.instructions);
 
@@ -96,7 +100,7 @@ export default function RecipeDetail() {
           <h1 style={titleStyle}>{recipe.title}</h1>
         </div>
 
-        {/* 2. On affiche les boutons SEULEMENT si canEditOrDelete est true */}
+        {/* Boutons d'action visibles selon permissions */}
         {canEditOrDelete && (
           <div style={actionButtonsStyle}>
             <Link to={`/modifier/${recipe._id}`} style={editButtonStyle}>
@@ -110,18 +114,14 @@ export default function RecipeDetail() {
             </button>
           </div>
         )}
-
-        {/* 3. On passe isOpen et onClose à la modale */}
-        <DeleteModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
       </div>
 
-      {recipe.imageUrl && (
-        <img src={recipe.imageUrl} alt={recipe.title} style={imageStyle} />
+      {/* Affichage de l'image si présente */}
+      {recipeImage && (
+        <img src={recipeImage} alt={recipe.title} style={imageStyle} />
       )}
 
+      {/* Barres d'infos (Temps, Portions) */}
       <div style={metaGridStyle}>
         <div style={metaCardStyle}>
           <span style={metaIconStyle}>⏱️</span>
@@ -143,49 +143,46 @@ export default function RecipeDetail() {
           <span style={metaIconStyle}>👥</span>
           <div>
             <div style={metaLabelStyle}>Portions</div>
-            <div style={metaValueStyle}>{recipe.servings || 1} personne(s)</div>
+            <div style={metaValueStyle}>{recipe.servings || 1} pers.</div>
           </div>
         </div>
       </div>
 
+      {/* Ingrédients */}
       <div style={sectionStyle}>
-        {/* Ingrédients */}
-        <div style={{ marginBottom: "25px" }}>
-          <h3>Ingrédients</h3>
-          {Array.isArray(recipe.ingredients) ? (
-            <ul style={{ paddingLeft: "20px", lineHeight: "1.8" }}>
-              {recipe.ingredients.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          ) : (
-            // Sécurité au cas où c'est une ancienne recette stockée en texte simple (String)
-            <p style={{ whitespace: "pre-line" }}>{recipe.ingredients}</p>
-          )}
-        </div>
+        <h3>🥗 Ingrédients</h3>
+        {ingredientsList.length > 0 ? (
+          <ul style={listStyle}>
+            {ingredientsList.map((item, index) => (
+              <li key={index} style={{ marginBottom: "8px" }}>
+                {item}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Aucun ingrédient renseigné.</p>
+        )}
       </div>
 
+      {/* Instructions */}
       <div style={sectionStyle}>
-        {/* Instructions / Étapes */}
-        <div style={{ marginBottom: "25px" }}>
-          <h3>Instructions</h3>
-          {Array.isArray(recipe.instructions) ? (
-            <ol style={{ paddingLeft: "20px", lineHeight: "1.8" }}>
-              {recipe.instructions.map((step, index) => (
-                <li key={index} style={{ marginBottom: "10px" }}>
-                  {step}
-                </li>
-              ))}
-            </ol>
-          ) : (
-            // Sécurité au cas où c'est du texte simple
-            <p style={{ whitespace: "pre-line" }}>{recipe.instructions}</p>
-          )}
-        </div>
+        <h3>👨‍🍳 Instructions</h3>
+        {instructionsList.length > 0 ? (
+          <ol style={listStyle}>
+            {instructionsList.map((step, index) => (
+              <li key={index} style={{ marginBottom: "12px" }}>
+                {step}
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p>Aucune instruction renseignée.</p>
+        )}
       </div>
 
+      {/* Modal de confirmation de suppression */}
       <DeleteModal
-        isOpen={isModalOpen} // ✅ Passer la variable, ne pas l'appeler !
+        isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         recipeId={recipe._id}
         recipeTitle={recipe.title}
@@ -194,18 +191,44 @@ export default function RecipeDetail() {
   );
 }
 
+// ==========================================
+// STYLES
+// ==========================================
 const containerStyle = {
-  width: "100%",
-  maxWidth: "900px", // Permet d'occuper une belle largeur sur grand écran
-  margin: "0 auto", // Centre la carte sur l'écran
+  maxWidth: "800px",
+  margin: "0 auto",
   padding: "20px",
-  boxSizing: "border-box",
+};
+
+const statusContainerStyle = {
+  textAlign: "center",
+  padding: "50px 20px",
+};
+
+const loadingStyle = {
+  fontSize: "1.2rem",
+  color: "#6c757d",
+};
+
+const errorStyle = {
+  fontSize: "1.2rem",
+  color: "#dc3545",
+  marginBottom: "20px",
+};
+
+const backButtonStyle = {
+  display: "inline-block",
+  padding: "10px 15px",
+  backgroundColor: "#0d6efd",
+  color: "#fff",
+  borderRadius: "5px",
+  textDecoration: "none",
 };
 
 const backLinkStyle = {
   display: "inline-block",
   marginBottom: "20px",
-  color: "#6b7280",
+  color: "#0d6efd",
   textDecoration: "none",
   fontWeight: "500",
 };
@@ -214,31 +237,28 @@ const headerSectionStyle = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "flex-start",
+  marginBottom: "20px",
   flexWrap: "wrap",
-  gap: "20px",
-  marginBottom: "25px",
+  gap: "15px",
 };
 
 const titleGroupStyle = {
   flex: "1",
 };
 
-const categoryBadgeStyle = {
-  display: "inline-block",
-  padding: "4px 12px",
-  backgroundColor: "#e0e7ff",
-  color: "#4338ca",
-  borderRadius: "20px",
-  fontSize: "0.85rem",
-  fontWeight: "600",
-  marginBottom: "10px",
+const titleStyle = {
+  fontSize: "2rem",
+  margin: "10px 0 0 0",
+  color: "#212529",
 };
 
-const titleStyle = {
-  fontSize: "2.2rem",
-  color: "#111827",
-  margin: "0",
-  fontWeight: "800",
+const categoryBadgeStyle = {
+  backgroundColor: "#e9ecef",
+  color: "#495057",
+  padding: "5px 10px",
+  borderRadius: "15px",
+  fontSize: "0.85rem",
+  fontWeight: "bold",
 };
 
 const actionButtonsStyle = {
@@ -248,21 +268,21 @@ const actionButtonsStyle = {
 
 const editButtonStyle = {
   padding: "8px 16px",
-  backgroundColor: "#f3f4f6",
-  color: "#374151",
-  borderRadius: "8px",
+  backgroundColor: "#ffc107",
+  color: "#000",
+  borderRadius: "5px",
   textDecoration: "none",
-  fontWeight: "600",
+  fontWeight: "500",
 };
 
 const deleteButtonStyle = {
   padding: "8px 16px",
-  backgroundColor: "#fee2e2",
-  color: "#dc2626",
+  backgroundColor: "#dc3545",
+  color: "#fff",
   border: "none",
-  borderRadius: "8px",
+  borderRadius: "5px",
+  fontWeight: "500",
   cursor: "pointer",
-  fontWeight: "600",
 };
 
 const imageStyle = {
@@ -270,23 +290,24 @@ const imageStyle = {
   maxHeight: "400px",
   objectFit: "cover",
   borderRadius: "12px",
-  marginBottom: "30px",
+  marginBottom: "25px",
 };
 
 const metaGridStyle = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
   gap: "15px",
-  marginBottom: "35px",
-  padding: "20px",
-  backgroundColor: "#f9fafb",
-  borderRadius: "12px",
+  marginBottom: "30px",
 };
 
 const metaCardStyle = {
   display: "flex",
   alignItems: "center",
   gap: "12px",
+  backgroundColor: "#f8f9fa",
+  padding: "15px",
+  borderRadius: "8px",
+  border: "1px solid #e9ecef",
 };
 
 const metaIconStyle = {
@@ -294,80 +315,26 @@ const metaIconStyle = {
 };
 
 const metaLabelStyle = {
-  fontSize: "0.85rem",
-  color: "#6b7280",
+  fontSize: "0.8rem",
+  color: "#6c757d",
 };
 
 const metaValueStyle = {
-  fontSize: "1.1rem",
-  fontWeight: "700",
-  color: "#111827",
+  fontSize: "1rem",
+  fontWeight: "bold",
+  color: "#212529",
 };
 
 const sectionStyle = {
-  marginBottom: "30px",
-};
-
-const sectionTitleStyle = {
-  fontSize: "1.4rem",
-  color: "#111827",
-  borderBottom: "2px solid #f3f4f6",
-  paddingBottom: "8px",
-  marginBottom: "15px",
-};
-
-const ingredientsListStyle = {
-  paddingLeft: "20px",
-  margin: "0",
-  color: "#374151",
-  lineHeight: "1.7",
-};
-
-const listItemStyle = {
-  marginBottom: "8px",
-  fontSize: "1.05rem",
-};
-
-const orderedListStyle = {
-  paddingLeft: "20px",
-  margin: "0",
-  color: "#374151",
-};
-
-const stepItemStyle = {
-  marginBottom: "14px",
-  fontSize: "1.05rem",
-  lineHeight: "1.6",
-  paddingLeft: "5px",
-};
-
-const statusContainerStyle = {
-  maxWidth: "500px",
-  margin: "80px auto",
-  padding: "30px",
-  backgroundColor: "#fff",
-  borderRadius: "12px",
-  boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
-  textAlign: "center",
-};
-
-const loadingStyle = {
-  fontSize: "1.2rem",
-  color: "#0d6efd",
-  fontWeight: "600",
-};
-
-const errorStyle = {
-  fontSize: "1.2rem",
-  color: "#dc3545",
-  fontWeight: "bold",
+  backgroundColor: "#ffffff",
+  padding: "20px",
+  borderRadius: "8px",
+  border: "1px solid #e9ecef",
   marginBottom: "20px",
 };
 
-const backButtonStyle = {
-  padding: "10px 20px",
-  backgroundColor: "#0d6efd",
-  color: "#fff",
-  textDecoration: "none",
-  borderRadius: "6px",
+const listStyle = {
+  paddingLeft: "20px",
+  lineHeight: "1.8",
+  margin: "10px 0 0 0",
 };
