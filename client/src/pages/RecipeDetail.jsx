@@ -39,7 +39,18 @@ export default function RecipeDetail() {
     // Si c'est déjà un tableau, on le retourne tel quel
     if (Array.isArray(data)) return data;
     // Si c'est une chaîne de caractères, on la découpe en tableau
-    if (typeof data === "string") return data.split("\n").filter(Boolean);
+    if (typeof data === "string" && data.trim() !== "") {
+      // Découpe par saut de ligne OU par virgule
+      return (
+        data
+          // Découpe par saut de ligne OU par virgule
+          .split(/[\n,]+/)
+          // Trim chaque élément et retire les éventuelles virgules en fin de mot
+          .map((item) => item.trim().replace(/,$/, "")) // Retire les virgules en fin de mot
+          .filter(Boolean)
+      );
+    }
+    // Si c'est vide ou autre chose, on retourne un tableau vide
     return [];
   };
 
@@ -144,12 +155,11 @@ export default function RecipeDetail() {
         </div>
       </div>
 
-
       {/* Ingrédients */}
       <div style={sectionStyle}>
-        <h3>Ingrédients</h3>
+        <h3>🛒 Ingrédients</h3>
         {ingredientsList.length > 0 ? (
-          <ul style={{ paddingLeft: "20px", lineHeight: "1.8" }}>
+          <ul style={{ paddingLeft: "20px", lineHeight: "2" }}>
             {ingredientsList.map((item, index) => (
               <li key={index}>{item.replace(/^•\s*/, "")}</li>
             ))}
@@ -161,11 +171,11 @@ export default function RecipeDetail() {
 
       {/* Instructions */}
       <div style={sectionStyle}>
-        <h3>👨‍🍳 Instructions</h3>
+        <h3>👨‍🍳 Instructions de préparation</h3>
         {instructionsList.length > 0 ? (
-          <ol style={{ paddingLeft: "20px", lineHeight: "1.8" }}>
+          <ol style={{ paddingLeft: "20px", lineHeight: "2" }}>
             {instructionsList.map((step, index) => (
-              <li key={index} style={{ marginBottom: "10px" }}>
+              <li key={index} style={{ marginBottom: "8px" }}>
                 {step.replace(/^\d+\.\s*/, "")}
               </li>
             ))}
